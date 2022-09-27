@@ -1,11 +1,11 @@
 package com.preonboarding.sensordashboard.domain.repository
 
-import android.hardware.TriggerEvent
+import android.hardware.SensorEvent
 import kotlinx.coroutines.flow.Flow
 
 interface SensorRepository {
 
-    fun getAccFlow(): Flow<TriggerEvent?>
+    fun getAccFlow(): Flow<SensorEvent?>
 
-    fun getGyroFlow(): Flow<TriggerEvent?>
+    fun getGyroFlow(): Flow<SensorEvent?>
 }

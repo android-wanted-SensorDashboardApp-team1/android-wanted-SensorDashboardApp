@@ -1,31 +1,53 @@
 package com.preonboarding.sensordashboard.data.repository
 
-import android.hardware.TriggerEvent
-import android.hardware.TriggerEventListener
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import com.preonboarding.sensordashboard.di.SensorScopeQualifier
 import com.preonboarding.sensordashboard.domain.repository.SensorRepository
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.callbackFlow
 import javax.inject.Inject
 
 class SensorRepositoryImpl @Inject constructor(
-    private val localDataSource: LocalDataSource
+    private val localDataSource: LocalDataSource,
+    @SensorScopeQualifier private val coroutineScope: CoroutineScope
 ) : SensorRepository {
 
-    override fun getAccFlow(): Flow<TriggerEvent?> {
+    private val errorFlow = MutableSharedFlow<Throwable>(
+        replay = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    private val ceh = CoroutineExceptionHandler { _, throwable ->
+        coroutineScope.launch {
+            errorFlow.emit(throwable)
+        }
+    }
+
+    private val sensorScope = coroutineScope + ceh
+
+    override fun getAccFlow(): Flow<SensorEvent?> {
         return callbackFlow {
-            var listener: TriggerEventListener? = localDataSource.getAccFlow { event ->
-                trySend(event)
+            var listener: SensorEventListener? = localDataSource.getAccFlow { event ->
+                sensorScope.launch {
+                    send(event)
+                }
             }
 
             awaitClose { listener = null }
         }
     }
 
-    override fun getGyroFlow(): Flow<TriggerEvent?> {
+    override fun getGyroFlow(): Flow<SensorEvent?> {
         return callbackFlow {
-            var listener: TriggerEventListener? = localDataSource.getGyroFlow { event ->
-                trySend(event)
+            var listener: SensorEventListener? = localDataSource.getGyroFlow { event ->
+                sensorScope.launch {
+                    send(event)
+                }
             }
 
             awaitClose { listener = null }

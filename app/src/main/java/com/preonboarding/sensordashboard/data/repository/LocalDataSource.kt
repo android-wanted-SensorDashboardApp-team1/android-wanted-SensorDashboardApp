@@ -1,9 +1,6 @@
 package com.preonboarding.sensordashboard.data.repository
 
-import android.hardware.Sensor
-import android.hardware.SensorManager
-import android.hardware.TriggerEvent
-import android.hardware.TriggerEventListener
+import android.hardware.*
 import com.preonboarding.sensordashboard.di.AccSensorQualifier
 import com.preonboarding.sensordashboard.di.GyroSensorQualifier
 import javax.inject.Inject
@@ -13,17 +10,25 @@ class LocalDataSource @Inject constructor(
     @AccSensorQualifier private val accSensor: Sensor,
     @GyroSensorQualifier private val gyroSensor: Sensor,
 ) {
-    lateinit var accTriggerEventListener: TriggerEventListener
-    lateinit var gyroTriggerEventListener: TriggerEventListener
+    private lateinit var accTriggerEventListener: SensorEventListener
+    private lateinit var gyroTriggerEventListener: SensorEventListener
 
-    fun getAccFlow(block: (TriggerEvent?) -> Unit): TriggerEventListener {
+    fun getAccFlow(block: (SensorEvent?) -> Unit): SensorEventListener {
         return if (!this::accTriggerEventListener.isInitialized) {
-            accTriggerEventListener = object : TriggerEventListener() {
-                override fun onTrigger(event: TriggerEvent?) {
+            accTriggerEventListener = object : SensorEventListener {
+                override fun onSensorChanged(event: SensorEvent?) {
                     block(event)
                 }
+
+                override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+
+                }
             }
-            sensorManager.requestTriggerSensor(accTriggerEventListener, accSensor)
+            sensorManager.registerListener(
+                accTriggerEventListener,
+                accSensor,
+                SensorManager.SENSOR_DELAY_NORMAL
+            )
 
             accTriggerEventListener
 
@@ -32,14 +37,22 @@ class LocalDataSource @Inject constructor(
         }
     }
 
-    fun getGyroFlow(block: (TriggerEvent?) -> Unit): TriggerEventListener {
+    fun getGyroFlow(block: (SensorEvent?) -> Unit): SensorEventListener {
         return if (!this::gyroTriggerEventListener.isInitialized) {
-            gyroTriggerEventListener = object : TriggerEventListener() {
-                override fun onTrigger(event: TriggerEvent?) {
+            gyroTriggerEventListener = object : SensorEventListener {
+                override fun onSensorChanged(event: SensorEvent?) {
                     block(event)
                 }
+
+                override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+
+                }
             }
-            sensorManager.requestTriggerSensor(gyroTriggerEventListener, gyroSensor)
+            sensorManager.registerListener(
+                gyroTriggerEventListener,
+                gyroSensor,
+                SensorManager.SENSOR_DELAY_NORMAL
+            )
 
             gyroTriggerEventListener
 
