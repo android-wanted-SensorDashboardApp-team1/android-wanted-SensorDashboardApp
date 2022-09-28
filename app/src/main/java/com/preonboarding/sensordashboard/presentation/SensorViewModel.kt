@@ -21,6 +21,7 @@ class SensorViewModel @Inject constructor(
 
     val accSensorFlow = accSensorUseCase.getAccFlow()
     val gyroSensorFlow = gyroSensorUseCase.getGyroFlow()
+    val sensorsFlow = roomUseCase.getSensorDataFlow()
 
     private val errorFlow = errorUseCase.getErrorFlow()
 
