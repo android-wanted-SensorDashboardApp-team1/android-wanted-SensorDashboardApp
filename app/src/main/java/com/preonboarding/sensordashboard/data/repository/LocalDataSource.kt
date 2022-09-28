@@ -4,12 +4,21 @@ import android.hardware.*
 import androidx.room.withTransaction
 import com.preonboarding.sensordashboard.data.dto.AxisData
 import com.preonboarding.sensordashboard.data.room.SensorDataBase
+import com.preonboarding.sensordashboard.di.coroutine.SensorScopeQualifier
 import com.preonboarding.sensordashboard.di.sensor.AccSensorQualifier
 import com.preonboarding.sensordashboard.di.sensor.GyroSensorQualifier
 import com.preonboarding.sensordashboard.domain.model.SensorData
 import com.preonboarding.sensordashboard.domain.model.SensorType
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import javax.inject.Inject
 
 class LocalDataSource @Inject constructor(
@@ -17,15 +26,26 @@ class LocalDataSource @Inject constructor(
     private val sensorDataBase: SensorDataBase,
     @AccSensorQualifier private val accSensor: Sensor,
     @GyroSensorQualifier private val gyroSensor: Sensor,
+    @SensorScopeQualifier private val coroutineScope: CoroutineScope
 ) {
-    private lateinit var accTriggerEventListener: SensorEventListener
-    private lateinit var gyroTriggerEventListener: SensorEventListener
+    private val errorFlow = MutableSharedFlow<Throwable>(
+        replay = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    private val ceh = CoroutineExceptionHandler { _, throwable ->
+        coroutineScope.launch {
+            errorFlow.emit(throwable)
+        }
+    }
+
+    private val sensorScope = coroutineScope + ceh
 
     private val sensorDao = sensorDataBase.sensorDao()
 
-    fun getAccFlow(block: (SensorData) -> Unit): SensorEventListener {
-        return if (!this::accTriggerEventListener.isInitialized) {
-            accTriggerEventListener = object : SensorEventListener {
+    fun getAccFlow(): Flow<SensorData> {
+        return callbackFlow {
+            var listener: SensorEventListener? = object : SensorEventListener {
                 override fun onSensorChanged(event: SensorEvent?) {
                     event?.let { sEvent ->
                         val array = sEvent.values
@@ -37,28 +57,28 @@ class LocalDataSource @Inject constructor(
                             type = SensorType.ACC
                         ).toSensorData()
 
-                        block(sensorData)
+                        sensorScope.launch {
+                            send(sensorData)
+                        }
                     }
                 }
 
                 override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
             }
+
             sensorManager.registerListener(
-                accTriggerEventListener,
+                listener,
                 accSensor,
                 SensorManager.SENSOR_DELAY_NORMAL
             )
 
-            accTriggerEventListener
-
-        } else {
-            accTriggerEventListener
+            awaitClose { listener = null }
         }
     }
 
-    fun getGyroFlow(block: (SensorData) -> Unit): SensorEventListener {
-        return if (!this::gyroTriggerEventListener.isInitialized) {
-            gyroTriggerEventListener = object : SensorEventListener {
+    fun getGyroFlow(): Flow<SensorData> {
+        return callbackFlow {
+            var listener: SensorEventListener? = object : SensorEventListener {
                 override fun onSensorChanged(event: SensorEvent?) {
                     //todo 드리프트 보상이 없는 무보정 x,y,z 값 리턴
                     //todo 추후에 보정된 값으로 변경 예정
@@ -73,22 +93,22 @@ class LocalDataSource @Inject constructor(
                             type = SensorType.GYRO
                         ).toSensorData()
 
-                        block(sensorData)
+                        sensorScope.launch {
+                            send(sensorData)
+                        }
                     }
                 }
 
                 override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
             }
+
             sensorManager.registerListener(
-                gyroTriggerEventListener,
+                listener,
                 gyroSensor,
                 SensorManager.SENSOR_DELAY_NORMAL
             )
 
-            gyroTriggerEventListener
-
-        } else {
-            gyroTriggerEventListener
+            awaitClose { listener = null }
         }
     }
 
@@ -102,6 +122,10 @@ class LocalDataSource @Inject constructor(
         return sensorDao.getSensorDataFlow().map { entity ->
             entity.toModel()
         }
+    }
+
+    fun getErrorFlow(): MutableSharedFlow<Throwable> {
+        return errorFlow
     }
 
 }

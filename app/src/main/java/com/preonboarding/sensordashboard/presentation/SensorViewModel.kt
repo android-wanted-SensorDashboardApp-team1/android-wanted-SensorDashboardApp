@@ -27,7 +27,7 @@ class SensorViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            gyroSensorFlow
+            accSensorFlow
                 .catch { errorFlow.emit(it) }
                 .onEach { event -> Log.e("event", event.toString()) }
                 .collect()
