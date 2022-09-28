@@ -1,8 +1,8 @@
 package com.preonboarding.sensordashboard.data.repository
 
-import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import com.preonboarding.sensordashboard.di.SensorScopeQualifier
+import com.preonboarding.sensordashboard.domain.model.SensorData
 import com.preonboarding.sensordashboard.domain.repository.SensorRepository
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BufferOverflow
@@ -30,11 +30,11 @@ class SensorRepositoryImpl @Inject constructor(
 
     private val sensorScope = coroutineScope + ceh
 
-    override fun getAccFlow(): Flow<SensorEvent?> {
+    override fun getAccFlow(): Flow<SensorData> {
         return callbackFlow {
-            var listener: SensorEventListener? = localDataSource.getAccFlow { event ->
+            var listener: SensorEventListener? = localDataSource.getAccFlow { sensorData ->
                 sensorScope.launch {
-                    send(event)
+                    send(sensorData)
                 }
             }
 
@@ -42,11 +42,11 @@ class SensorRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getGyroFlow(): Flow<SensorEvent?> {
+    override fun getGyroFlow(): Flow<SensorData> {
         return callbackFlow {
-            var listener: SensorEventListener? = localDataSource.getGyroFlow { event ->
+            var listener: SensorEventListener? = localDataSource.getGyroFlow { sensorData ->
                 sensorScope.launch {
-                    send(event)
+                    send(sensorData)
                 }
             }
 
@@ -56,5 +56,13 @@ class SensorRepositoryImpl @Inject constructor(
 
     override fun errorFlow(): MutableSharedFlow<Throwable> {
         return errorFlow
+    }
+
+    override suspend fun insertSensorData(sensorData: SensorData) {
+        localDataSource.insertSensorData(sensorData)
+    }
+
+    override fun getSensorDataFlow(): Flow<SensorData> {
+        return localDataSource.getSensorDataFlow()
     }
 }
