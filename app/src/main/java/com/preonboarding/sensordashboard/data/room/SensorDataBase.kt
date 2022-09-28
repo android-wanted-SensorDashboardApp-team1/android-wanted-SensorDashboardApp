@@ -3,10 +3,16 @@ package com.preonboarding.sensordashboard.data.room
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.preonboarding.sensordashboard.data.room.SensorDataBase.Companion.ROOM_VERSION
+import com.preonboarding.sensordashboard.data.room.entity.SensorAxisDataEntity
 import com.preonboarding.sensordashboard.data.room.entity.SensorDataEntity
+import com.preonboarding.sensordashboard.domain.model.SensorData
 
-@Database(entities = [SensorDataEntity::class], version = ROOM_VERSION, exportSchema = false)
-abstract class SensorDataBase :RoomDatabase() {
+@Database(
+    entities = [SensorDataEntity::class],
+    version = ROOM_VERSION,
+    exportSchema = false
+)
+abstract class SensorDataBase : RoomDatabase() {
 
     abstract fun sensorDao(): SensorDao
 

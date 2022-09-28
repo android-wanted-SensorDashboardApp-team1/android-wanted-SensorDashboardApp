@@ -7,5 +7,5 @@ interface RoomUseCase {
 
     suspend fun insertSensorData(sensorData: SensorData)
 
-    fun getSensorDataFlow(): Flow<List<SensorData>>
+    fun getSensorDataFlow(): Flow<List<SensorData?>>
 }

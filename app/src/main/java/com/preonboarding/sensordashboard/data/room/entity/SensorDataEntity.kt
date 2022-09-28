@@ -8,9 +8,7 @@ import com.preonboarding.sensordashboard.domain.model.SensorType
 @Entity(tableName = "SensorDataEntity")
 data class SensorDataEntity(
     @PrimaryKey(autoGenerate = true) val id: Long,
-    @ColumnInfo(name = "axisX") val x: Float,
-    @ColumnInfo(name = "axisY") val y: Float,
-    @ColumnInfo(name = "axisZ") val z: Float,
+    @ColumnInfo(name = "dataList") val dataList: String,
     @ColumnInfo(name = "type") val type: SensorType,
     @ColumnInfo(name = "date") val date: String
 ) {
@@ -18,12 +16,9 @@ data class SensorDataEntity(
     companion object {
         val EMPTY = SensorDataEntity(
             id = 0,
-            x = 0f,
-            y = 0f,
-            z = 0f,
+            dataList = "",
             type = SensorType.EMPTY,
             date = ""
         )
     }
-
 }

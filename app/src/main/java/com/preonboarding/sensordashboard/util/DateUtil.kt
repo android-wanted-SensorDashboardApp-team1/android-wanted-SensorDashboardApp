@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat
 
 object DateUtil {
 
-    private val dateFormat = SimpleDateFormat("yyyy-mm-dd hh:mm:ss")
+    private val dateFormat = SimpleDateFormat("yyyy-MM-dd hh:mm:ss")
 
     fun getCurrentTime(): String {
         val timeStamp = Timestamp(System.currentTimeMillis())

@@ -2,6 +2,9 @@ package com.preonboarding.sensordashboard.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.preonboarding.sensordashboard.domain.model.SensorAxisData
+import com.preonboarding.sensordashboard.domain.model.SensorData
+import com.preonboarding.sensordashboard.domain.model.SensorType
 import com.preonboarding.sensordashboard.domain.usecase.AccSensorUseCase
 import com.preonboarding.sensordashboard.domain.usecase.ErrorUseCase
 import com.preonboarding.sensordashboard.domain.usecase.GyroSensorUseCase
@@ -24,11 +27,33 @@ class SensorViewModel @Inject constructor(
 
     private val errorFlow = errorUseCase.getErrorFlow()
 
+    private val accSensorDataList = mutableListOf<SensorAxisData>()
+
     init {
+//        viewModelScope.launch { //Sensor data 수집
+//            accSensorFlow
+//                .onEach { accSensorDataList.add(it) }
+////                .onEach { Timber.e(it.toString()) }
+//                .collect()
+//        }
+
         viewModelScope.launch {
             errorFlow.collect {
                 Timber.e(it.stackTraceToString())
             }
+        }
+    }
+
+    fun testInsert() {
+        viewModelScope.launch {
+            roomUseCase.insertSensorData(
+                SensorData.EMPTY.copy(
+                    dataList = accSensorDataList,
+                    type = SensorType.ACC
+                )
+            )
+
+            accSensorDataList.clear()
         }
     }
 }
