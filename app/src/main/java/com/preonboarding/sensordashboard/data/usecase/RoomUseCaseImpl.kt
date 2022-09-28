@@ -16,7 +16,7 @@ class RoomUseCaseImpl @Inject constructor(
         sensorRepository.insertSensorData(sensorData)
     }
 
-    override fun getSensorDataFlow(): Flow<SensorData> {
+    override fun getSensorDataFlow(): Flow<List<SensorData>> {
         return sensorRepository.getSensorDataFlow()
     }
 }

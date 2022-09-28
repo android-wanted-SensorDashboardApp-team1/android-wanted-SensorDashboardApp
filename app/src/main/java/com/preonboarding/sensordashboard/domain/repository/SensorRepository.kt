@@ -14,5 +14,5 @@ interface SensorRepository {
 
     suspend fun insertSensorData(sensorData: SensorData)
 
-    fun getSensorDataFlow(): Flow<SensorData>
+    fun getSensorDataFlow(): Flow<List<SensorData>>
 }

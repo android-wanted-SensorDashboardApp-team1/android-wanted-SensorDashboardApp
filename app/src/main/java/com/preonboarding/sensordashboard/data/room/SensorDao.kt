@@ -15,6 +15,6 @@ interface SensorDao {
     fun insertSensorData(sensorDataEntity: SensorDataEntity)
 
     @Query("SELECT * FROM SensorDataEntity")
-    fun getSensorDataFlow(): Flow<SensorDataEntity>
+    fun getSensorDataFlow(): Flow<List<SensorDataEntity>>
 
 }

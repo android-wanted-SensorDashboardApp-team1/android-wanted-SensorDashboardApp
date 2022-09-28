@@ -118,9 +118,11 @@ class LocalDataSource @Inject constructor(
         }
     }
 
-    fun getSensorDataFlow(): Flow<SensorData> {
-        return sensorDao.getSensorDataFlow().map { entity ->
-            entity.toModel()
+    fun getSensorDataFlow(): Flow<List<SensorData>> {
+        return sensorDao.getSensorDataFlow().map { list ->
+            list.map {
+                it.toModel()
+            }
         }
     }
 

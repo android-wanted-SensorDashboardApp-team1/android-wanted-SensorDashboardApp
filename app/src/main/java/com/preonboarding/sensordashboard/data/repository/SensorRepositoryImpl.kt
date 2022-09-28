@@ -26,7 +26,7 @@ class SensorRepositoryImpl @Inject constructor(
         localDataSource.insertSensorData(sensorData)
     }
 
-    override fun getSensorDataFlow(): Flow<SensorData> {
+    override fun getSensorDataFlow(): Flow<List<SensorData>> {
         return localDataSource.getSensorDataFlow()
     }
 }

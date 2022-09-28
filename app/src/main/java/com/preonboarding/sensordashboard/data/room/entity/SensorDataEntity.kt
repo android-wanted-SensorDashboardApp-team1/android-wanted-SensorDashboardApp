@@ -17,7 +17,7 @@ data class SensorDataEntity(
 
     companion object {
         val EMPTY = SensorDataEntity(
-            id = -1,
+            id = 0,
             x = 0f,
             y = 0f,
             z = 0f,
