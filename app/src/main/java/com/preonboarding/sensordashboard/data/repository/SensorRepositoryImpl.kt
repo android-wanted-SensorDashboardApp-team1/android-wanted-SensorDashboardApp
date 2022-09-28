@@ -1,7 +1,7 @@
 package com.preonboarding.sensordashboard.data.repository
 
 import android.hardware.SensorEventListener
-import com.preonboarding.sensordashboard.di.SensorScopeQualifier
+import com.preonboarding.sensordashboard.di.coroutine.SensorScopeQualifier
 import com.preonboarding.sensordashboard.domain.model.SensorData
 import com.preonboarding.sensordashboard.domain.repository.SensorRepository
 import kotlinx.coroutines.*

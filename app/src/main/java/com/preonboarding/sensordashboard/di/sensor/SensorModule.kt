@@ -1,8 +1,10 @@
-package com.preonboarding.sensordashboard.di
+package com.preonboarding.sensordashboard.di.sensor
 
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorManager
+import com.preonboarding.sensordashboard.di.sensor.AccSensorQualifier
+import com.preonboarding.sensordashboard.di.sensor.GyroSensorQualifier
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

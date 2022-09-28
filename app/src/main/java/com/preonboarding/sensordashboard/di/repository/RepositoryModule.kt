@@ -1,4 +1,4 @@
-package com.preonboarding.sensordashboard.di
+package com.preonboarding.sensordashboard.di.repository
 
 import com.preonboarding.sensordashboard.data.repository.SensorRepositoryImpl
 import com.preonboarding.sensordashboard.domain.repository.SensorRepository

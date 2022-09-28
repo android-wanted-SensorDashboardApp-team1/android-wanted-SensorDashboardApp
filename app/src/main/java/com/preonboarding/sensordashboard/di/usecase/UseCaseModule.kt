@@ -1,4 +1,4 @@
-package com.preonboarding.sensordashboard.di
+package com.preonboarding.sensordashboard.di.usecase
 
 import com.preonboarding.sensordashboard.data.usecase.AccSensorUseCaseImpl
 import com.preonboarding.sensordashboard.data.usecase.ErrorUseCaseImpl

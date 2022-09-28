@@ -4,8 +4,8 @@ import android.hardware.*
 import androidx.room.withTransaction
 import com.preonboarding.sensordashboard.data.dto.AxisData
 import com.preonboarding.sensordashboard.data.room.SensorDataBase
-import com.preonboarding.sensordashboard.di.AccSensorQualifier
-import com.preonboarding.sensordashboard.di.GyroSensorQualifier
+import com.preonboarding.sensordashboard.di.sensor.AccSensorQualifier
+import com.preonboarding.sensordashboard.di.sensor.GyroSensorQualifier
 import com.preonboarding.sensordashboard.domain.model.SensorData
 import com.preonboarding.sensordashboard.domain.model.SensorType
 import kotlinx.coroutines.flow.Flow

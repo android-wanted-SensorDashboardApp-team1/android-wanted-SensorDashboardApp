@@ -1,5 +1,6 @@
-package com.preonboarding.sensordashboard.di
+package com.preonboarding.sensordashboard.di.coroutine
 
+import com.preonboarding.sensordashboard.di.IoDispatcher
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

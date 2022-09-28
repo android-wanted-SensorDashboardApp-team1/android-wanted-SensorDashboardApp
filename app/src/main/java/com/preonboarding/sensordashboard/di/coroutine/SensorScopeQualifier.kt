@@ -1,4 +1,4 @@
-package com.preonboarding.sensordashboard.di
+package com.preonboarding.sensordashboard.di.coroutine
 
 import javax.inject.Qualifier
 

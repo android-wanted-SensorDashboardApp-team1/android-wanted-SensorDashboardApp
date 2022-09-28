@@ -1,4 +1,4 @@
-package com.preonboarding.sensordashboard.di
+package com.preonboarding.sensordashboard.di.room
 
 import android.content.Context
 import androidx.room.Room
