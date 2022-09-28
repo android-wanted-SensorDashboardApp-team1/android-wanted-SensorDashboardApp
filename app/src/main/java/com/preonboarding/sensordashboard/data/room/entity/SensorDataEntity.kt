@@ -10,7 +10,8 @@ data class SensorDataEntity(
     @PrimaryKey(autoGenerate = true) val id: Long,
     @ColumnInfo(name = "dataList") val dataList: String,
     @ColumnInfo(name = "type") val type: SensorType,
-    @ColumnInfo(name = "date") val date: String
+    @ColumnInfo(name = "date") val date: String,
+    @ColumnInfo(name = "time") val time: Float
 ) {
 
     companion object {
@@ -18,7 +19,8 @@ data class SensorDataEntity(
             id = 0,
             dataList = "",
             type = SensorType.EMPTY,
-            date = ""
+            date = "",
+            time = 60f
         )
     }
 }

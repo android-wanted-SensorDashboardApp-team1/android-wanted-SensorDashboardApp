@@ -10,6 +10,8 @@ import com.preonboarding.sensordashboard.domain.usecase.ErrorUseCase
 import com.preonboarding.sensordashboard.domain.usecase.GyroSensorUseCase
 import com.preonboarding.sensordashboard.domain.usecase.RoomUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -22,21 +24,11 @@ class SensorViewModel @Inject constructor(
     private val roomUseCase: RoomUseCase
 ) : ViewModel() {
 
-    val accSensorFlow = accSensorUseCase.getAccFlow()
-    val gyroSensorFlow = gyroSensorUseCase.getGyroFlow()
-
     private val errorFlow = errorUseCase.getErrorFlow()
 
     private val accSensorDataList = mutableListOf<SensorAxisData>()
 
     init {
-//        viewModelScope.launch { //Sensor data 수집
-//            accSensorFlow
-//                .onEach { accSensorDataList.add(it) }
-////                .onEach { Timber.e(it.toString()) }
-//                .collect()
-//        }
-
         viewModelScope.launch {
             errorFlow.collect {
                 Timber.e(it.stackTraceToString())
