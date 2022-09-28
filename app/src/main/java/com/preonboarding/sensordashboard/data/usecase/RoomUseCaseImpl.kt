@@ -12,10 +12,8 @@ class RoomUseCaseImpl @Inject constructor(
     private val sensorRepository: SensorRepository
 ) : RoomUseCase {
 
-    override suspend fun insertSensorData(scope: CoroutineScope, sensorData: SensorData) {
-        scope.launch {
-            sensorRepository.insertSensorData(sensorData)
-        }
+    override suspend fun insertSensorData(sensorData: SensorData) {
+        sensorRepository.insertSensorData(sensorData)
     }
 
     override fun getSensorDataFlow(): Flow<SensorData> {

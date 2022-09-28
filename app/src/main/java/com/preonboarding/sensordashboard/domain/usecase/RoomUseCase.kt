@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface RoomUseCase {
 
-    suspend fun insertSensorData(scope: CoroutineScope, sensorData: SensorData)
+    suspend fun insertSensorData( sensorData: SensorData)
 
     fun getSensorDataFlow(): Flow<SensorData>
 }
