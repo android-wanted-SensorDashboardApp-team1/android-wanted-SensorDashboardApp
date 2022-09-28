@@ -31,7 +31,7 @@ object SensorModule {
     @Provides
     @Singleton
     fun providesGyroSensor(sensorManager: SensorManager): Sensor {
-        return sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
+        return sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE_UNCALIBRATED)
     }
 
 }

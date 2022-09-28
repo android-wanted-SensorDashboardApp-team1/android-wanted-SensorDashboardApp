@@ -1,8 +1,8 @@
 package com.preonboarding.sensordashboard.domain.model
 
 data class SensorData(
-    val x: Double,
-    val y: Double,
-    val z: Double,
+    val x: Float,
+    val y: Float,
+    val z: Float,
     val type: SensorType
 )
