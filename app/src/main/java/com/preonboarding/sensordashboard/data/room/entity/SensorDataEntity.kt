@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.preonboarding.sensordashboard.domain.model.SensorType
+import com.preonboarding.sensordashboard.util.DateUtil
 
 @Entity(tableName = "SensorDataEntity")
 data class SensorDataEntity(
@@ -11,6 +12,7 @@ data class SensorDataEntity(
     @ColumnInfo(name = "dataList") val dataList: String,
     @ColumnInfo(name = "type") val type: SensorType,
     @ColumnInfo(name = "date") val date: String,
+    @ColumnInfo(name = "dateValue") val dateValue: Long,
     @ColumnInfo(name = "time") val time: Float
 ) {
 
@@ -20,6 +22,7 @@ data class SensorDataEntity(
             dataList = "",
             type = SensorType.EMPTY,
             date = "",
+            dateValue = 0,
             time = 60f
         )
     }

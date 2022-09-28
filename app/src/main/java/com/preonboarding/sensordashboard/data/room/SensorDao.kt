@@ -14,7 +14,7 @@ interface SensorDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertSensorData(sensorDataEntity: SensorDataEntity)
 
-    @Query("SELECT * FROM SensorDataEntity")
+    @Query("SELECT * FROM SensorDataEntity ORDER BY dateValue DESC")
     fun getSensorDataFlow(): Flow<List<SensorDataEntity>>
 
 }

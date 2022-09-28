@@ -24,11 +24,27 @@ class SensorViewModel @Inject constructor(
     private val roomUseCase: RoomUseCase
 ) : ViewModel() {
 
+    val accSensorFlow = accSensorUseCase.getAccFlow()
+    val gyroSensorFlow = gyroSensorUseCase.getGyroFlow()
+
     private val errorFlow = errorUseCase.getErrorFlow()
 
     private val accSensorDataList = mutableListOf<SensorAxisData>()
 
     init {
+//        viewModelScope.launch { //Sensor data 수집
+//            accSensorFlow
+//                .onEach { accSensorDataList.add(it) }
+////                .onEach { Timber.e(it.toString()) }
+//                .collect()
+//        }
+
+        viewModelScope.launch {
+            roomUseCase.getSensorDataFlow()
+                .onEach { Timber.e(it.toString()) }
+                .collect()
+        }
+
         viewModelScope.launch {
             errorFlow.collect {
                 Timber.e(it.stackTraceToString())
@@ -41,7 +57,7 @@ class SensorViewModel @Inject constructor(
             roomUseCase.insertSensorData(
                 SensorData.EMPTY.copy(
                     dataList = accSensorDataList,
-                    type = SensorType.ACC
+                    type = SensorType.GYRO
                 )
             )
 

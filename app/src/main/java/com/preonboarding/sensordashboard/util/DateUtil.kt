@@ -12,4 +12,10 @@ object DateUtil {
 
         return dateFormat.format(timeStamp)
     }
+
+    fun getTime(): Long {
+        val timeStamp = Timestamp(System.currentTimeMillis())
+
+        return timeStamp.time
+    }
 }
