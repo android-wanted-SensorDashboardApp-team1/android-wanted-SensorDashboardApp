@@ -53,4 +53,8 @@ class SensorRepositoryImpl @Inject constructor(
             awaitClose { listener = null }
         }
     }
+
+    override fun errorFlow(): MutableSharedFlow<Throwable> {
+        return errorFlow
+    }
 }

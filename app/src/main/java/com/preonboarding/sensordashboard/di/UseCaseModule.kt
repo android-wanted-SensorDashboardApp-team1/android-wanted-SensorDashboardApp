@@ -1,8 +1,10 @@
 package com.preonboarding.sensordashboard.di
 
 import com.preonboarding.sensordashboard.data.usecase.AccSensorUseCaseImpl
+import com.preonboarding.sensordashboard.data.usecase.ErrorUseCaseImpl
 import com.preonboarding.sensordashboard.data.usecase.GyroSensorUseCaseImpl
 import com.preonboarding.sensordashboard.domain.usecase.AccSensorUseCase
+import com.preonboarding.sensordashboard.domain.usecase.ErrorUseCase
 import com.preonboarding.sensordashboard.domain.usecase.GyroSensorUseCase
 import dagger.Binds
 import dagger.Module
@@ -23,4 +25,7 @@ abstract class UseCaseModule {
     @ViewModelScoped
     abstract fun bindsGyroUseCase(gyroUseCaseImpl: GyroSensorUseCaseImpl): GyroSensorUseCase
 
+    @Binds
+    @ViewModelScoped
+    abstract fun bindsErrorUseCase(errorUseCaseImpl: ErrorUseCaseImpl): ErrorUseCase
 }
