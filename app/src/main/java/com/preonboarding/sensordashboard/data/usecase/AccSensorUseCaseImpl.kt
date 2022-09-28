@@ -10,11 +10,10 @@ import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
 class AccSensorUseCaseImpl @Inject constructor(
-    private val repository: SensorRepository,
-    @IoDispatcher val ioDispatcher: CoroutineDispatcher
+    private val repository: SensorRepository
 ) : AccSensorUseCase {
 
     override fun getAccFlow(): Flow<SensorEvent?> {
-        return repository.getAccFlow().flowOn(ioDispatcher)
+        return repository.getAccFlow()
     }
 }

@@ -10,11 +10,10 @@ import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
 class GyroSensorUseCaseImpl @Inject constructor(
-    private val repository: SensorRepository,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
+    private val repository: SensorRepository
 ) : GyroSensorUseCase {
 
     override fun getGyroFlow(): Flow<SensorEvent?> {
-        return repository.getGyroFlow().flowOn(ioDispatcher)
+        return repository.getGyroFlow()
     }
 }
