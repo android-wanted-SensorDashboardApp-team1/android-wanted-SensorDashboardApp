@@ -34,16 +34,6 @@ class SensorViewModel @Inject constructor(
     private val accSensorDataList = mutableListOf<SensorAxisData>()
 
     init {
-// todo Sensor관련된 Flow를 취소할 수 있는 예시에요. 불필요 시, 제거 필수!!
-//        val job = viewModelScope.launch { //Sensor data 수집
-//            accSensorUseCase.getAccFlow()
-//                .onEach { accSensorDataList.add(it) }
-//                .collect()
-//        }
-//        viewModelScope.launch {
-//            delay(60000) // timeOut
-//            job.cancelAndJoin() // collect() 취소를 위해서 job cancel
-//        }
 
         viewModelScope.launch {
             errorFlow.collect {
