@@ -19,6 +19,7 @@ import com.preonboarding.sensordashboard.databinding.ActivityMeasureBinding
 import com.preonboarding.sensordashboard.domain.model.SensorType
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @AndroidEntryPoint
 class MeasureActivity : AppCompatActivity() {
@@ -70,7 +71,6 @@ class MeasureActivity : AppCompatActivity() {
             when (type) {
                 SensorType.ACC -> {
                     viewModel.updateCurrentSensorType(SensorType.ACC)
-
                     viewModel.measureAccSensor()
                 }
                 SensorType.GYRO -> {

@@ -96,7 +96,7 @@ class MeasureViewModel @Inject constructor(
 
     fun saveSensorData() {
         viewModelScope.launch {
-            var time = (60000 - measureTime) / 1000.0f
+            var time = (60000 - measureTime) / 1000f
             val df = DecimalFormat("#.#")
             time = df.format(time).toFloat()
             roomUseCase.insertSensorData(
