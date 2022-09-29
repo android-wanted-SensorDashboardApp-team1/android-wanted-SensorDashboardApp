@@ -245,6 +245,139 @@ https://user-images.githubusercontent.com/35549958/193092306-73a2e060-4596-42d3-
 - Adapter로 부터 아이템의 id를 받아서 viewmodel에게 전달, 아이템 삭제  
 
 -------------------
+## 박규림
+- 담당한 일
+	- paging library 적용
+- 기여한 점
+	- paging library 관련 소스 작성
+- 아쉬운 점
+	- paging library 완성하지 못한 것이 아쉽습니다.
+	
+<img width="605" alt="스크린샷 2022-09-30 오전 4 08 15" src="https://user-images.githubusercontent.com/31344894/193120957-97952d81-0148-48fc-8a22-659e9b46758c.png">
+
+### Repository Layer
+- 구성요소
+	- PagingSource: 데이터 소스와 이 소스에서 데이터를 검색하는 방법 정의
+```kotlin
+class SensorPagingSource (
+    private val repository: SensorRepository
+): PagingSource<Int, SensorData>() {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SensorData> {
+        val page = params.key ?: 1
+        return try {
+            val entities = repository.getSensorDataFlow()
+
+            if (page != 0) delay(1000)
+            LoadResult.Page(
+                data = entities,
+                prevKey = if (page == 0) null else page - 1,
+                nextKey = if (entities.isEmpty()) null else page + 1
+            )
+        } catch (e: java.lang.Exception) {
+            LoadResult.Error(e)
+        }
+    }
+
+    override fun getRefreshKey(state: PagingState<Int, SensorData>): Int? {
+        return state.anchorPosition?.let { anchorPosition ->
+            val anchorPage = state.closestPageToPosition(anchorPosition)
+            anchorPage?.prevKey?.plus(1) ?: anchorPage?.nextKey?.minus(1)
+        }
+    }
+}
+```
+
+### ViewModel Layer
+- 구성요소
+	- PagingData: 페이지로 나눈 데이터의 스냅샷을 보유하는 컨테이너
+
+```kotlin
+interface SensorRepository {
+    fun getSensorDataFlow(): Flow<PagingData<SensorData>>
+}
+````
+
+```kotlin
+class SensorRepositoryImpl @Inject constructor(
+    private val localDataSource: LocalDataSource
+) : SensorRepository {
+    override fun getSensorDataFlow(): Flow<PagingData<SensorData>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 10,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = {SensorPagingSource(this)}
+        ).flow
+    }
+```
+- Repository에서 Pager와 PagingSource를 사용하여 PagingData로 반환
+
+```kotlin
+fun getSensorData() {
+        viewModelScope.launch {
+            roomUseCase.getSensorDataFlow().cachedIn(viewModelScope).collectLatest {
+                _sensorFlow.emit(it)
+            }
+        }
+    }
+```
+- ViewModel에서 PagingData 가져오기 
+
+### UI Layer
+- 구성요소
+	- PagingDataAdapter: 페이지로 나눈 데이터를 처리하는 RecyclerView Adapter 
+
+```kotlin
+class MainRecyclerViewAdapter(val viewModel: SensorViewModel) :
+    PagingDataAdapter<SensorData, MainRecyclerViewAdapter.ViewHolder>(SensorDiffCallback()) {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val binding =
+            ItemMainRecyclerviewBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        getItem(position)?.let { 
+            holder.bind(it)
+        }
+    }
+
+    inner class ViewHolder(private val binding: ItemMainRecyclerviewBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(sensorData: SensorData) {
+            // 생략
+        }
+    }
+}
+
+class SensorDiffCallback : DiffUtil.ItemCallback<SensorData>() {
+    override fun areItemsTheSame(oldItem: SensorData, newItem: SensorData): Boolean {
+        return oldItem.id == newItem.id
+    }
+
+    override fun areContentsTheSame(oldItem: SensorData, newItem: SensorData): Boolean {
+        return oldItem == newItem
+    }
+}
+```
+- PagingDataAdapter를 통해 PagingData 표시 
+
+
+```kotlin
+lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                sensorViewModel.sensorsFlow.collectLatest {
+                    recyclerViewAdapter.submitData(it)
+                }
+            }
+        }
+```
+- MainActivity에서 Adapter를 설정하고 PagingData를 collect 하기
+
+
+
+-------------------
 
 
 ## Convention 
