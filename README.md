@@ -149,7 +149,73 @@
 - ceh에서 잡힌 error는 ErrorFlow를 통해 방출됩니다. 
 
 
+# 김현국
+- 담당한 일
+    - Sensor Graph 구현
+- 기여한 점
+    - 데이터 graph 바인딩
+    - Measure Activity 구현
+- 아쉬운점
+    - 그래프를 직접 구현하지 않고, library를 사용한 부분이 아쉽습니다.
 
+
+# Measure Activity
+<img src="https://user-images.githubusercontent.com/62296097/193047349-a8dc
+1079-f9a7-4a74-aaea-d56853189b06.gif" width="300" height="600" />
+
+- RadioGroup을 사용하여 GyroScope와 가속도계를 지정할 수 있도록 하였습니다.
+- 측정 버튼을 클릭시 RadioGroup을 선택할 수 없도록 하였습니다.
+- 측정 버튼 클릭시, 선택한 Sensor Type으로 측정을 시작하며, 정지 버튼이 보이게 됩니다.
+- 정지 버튼을 클릭시, 데이터 수집을 중단합니다.
+- 측정 버튼을 다시 클릭 시 그래프를 초기화하며 재측정합니다.
+- 저장버튼 클릭시, 측정한 데이터가 있을 경우, 성공 토스트를 출력하며, 측정한 데이터가 없을 경우, 측정한 데이터가 없다는 토스트를 출력합니다.
+
+
+## 측정 시간 카운트 다운
+```kotlin 
+time = object : CountDownTimer(60000, 100) {
+                override fun onTick(tick: Long) {
+                    viewModel.measureTime = tick
+                }
+
+                override fun onFinish() {
+                    viewModel.pressStop()
+                    radioGroup[0].isEnabled = true
+                    radioGroup[1].isEnabled = true
+                }
+            }.start()
+```
+
+```kotlin 
+ fun saveSensorData() {
+        viewModelScope.launch {
+            var time = (60000 - measureTime) / 1000f
+            val df = DecimalFormat("#.#")
+            time = df.format(time).toFloat()
+ ```
+
+- 측정 시간을 저장하기 위해서, CountDownTimer를 사용했습니다.
+- 최대 60초로 측정하며, countDonwInterval를 100ms로 지정하며 소수점 첫번째 단위까지 계산할 수 있도록 하였습니다.
+
+
+## Acc & Gyro Data Collect
+```kotlin
+    measuredSensorData.collect sensorAxisData ->
+        addSensorAxisData(sensorAxisData)
+        addEntry(sensorAxisData.x.toDouble(), label = "x")
+        addEntry(sensorAxisData.y.toDouble(), label = "y")
+        addEntry(sensorAxisData.z.toDouble(), label = "z")
+        binding.tvX.text = "x ${sensorAxisData.x.toDouble()}"
+        binding.tvY.text = "y ${sensorAxisData.y.toDouble()}"
+        binding.tvZ.text = "z ${sensorAxisData.z.toDouble()}"
+    }
+}    
+```
+- ViewModel에서 UseCase를 호출하여 data layer에서 측정되는 Sensor 데이터를 수집했습니다.
+
+- 수집된 데이터를 저장하기 위해서 따로 List에 Sensor데이터를 저장했습니다.
+
+- 수집된 센서 데이터들은 Graph에 바인드 되며, TextView의 텍스트를 업데이트 하도록 하였습니다.
 
 ## Convention 
 
