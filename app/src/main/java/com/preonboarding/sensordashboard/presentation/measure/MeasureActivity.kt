@@ -41,17 +41,11 @@ class MeasureActivity : AppCompatActivity() {
             when (i) {
                 R.id.radio_button_acc -> {
                     type = "Acc"
-                    initChart()
-                    binding.tvX.setText(R.string.measure_x_init)
-                    binding.tvY.setText(R.string.measure_y_init)
-                    binding.tvZ.setText(R.string.measure_z_init)
+                    refreshData()
                 }
                 R.id.radio_button_gyro -> {
                     type = "Gyro"
-                    initChart()
-                    binding.tvX.setText(R.string.measure_x_init)
-                    binding.tvY.setText(R.string.measure_y_init)
-                    binding.tvZ.setText(R.string.measure_z_init)
+                    refreshData()
                 }
             }
         }
@@ -93,11 +87,18 @@ class MeasureActivity : AppCompatActivity() {
         }
 
         tvSave.setOnClickListener {
-            if (viewModel.sensorDataList.isNotEmpty()) {
+            println(viewModel.sensorDataList)
+            if (viewModel.sensorDataList.size == 1 || viewModel.sensorDataList.isEmpty()) {
                 Toast.makeText(this@MeasureActivity, R.string.measure_empty, Toast.LENGTH_SHORT)
                     .show()
             } else {
                 viewModel.saveSensorData()
+                Toast.makeText(
+                    this@MeasureActivity,
+                    R.string.measure_save_success,
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
             }
         }
         ivBack.setOnClickListener { // 뒤로 가기
@@ -196,5 +197,13 @@ class MeasureActivity : AppCompatActivity() {
 
         notifyDataSetChanged()
         moveViewTo(data.entryCount.toFloat(), 50f, YAxis.AxisDependency.LEFT)
+    }
+
+    private fun refreshData() {
+        initChart()
+        binding.tvX.setText(R.string.measure_x_init)
+        binding.tvY.setText(R.string.measure_y_init)
+        binding.tvZ.setText(R.string.measure_z_init)
+        viewModel.clearSensorDataList()
     }
 }
