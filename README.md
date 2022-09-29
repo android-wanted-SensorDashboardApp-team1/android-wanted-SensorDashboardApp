@@ -379,6 +379,109 @@ lifecycleScope.launch {
 
 -------------------
 
+## 박인아
+- 담당한 일
+    - 코루틴을 사용하여 타이머 구현
+- 남은 작업
+    - 메소드 기능 분리
+- 아쉬운 점
+    - 외부에서 타이머의 동작 상태를 알 수 있는 방법을 Flow로 구현하고 싶었음.
+    
+    
+### 타이머 상태 정의
+
+
+```kotlin 
+sealed class CustomTimerState{
+    object Start: CustomTimerState()
+    object Stop: CustomTimerState()
+}
+
+```
+
+    - 타이머의 상태는 Start, Stop 만 존재하기 때문에, sealed class로 정의하였습니다.
+
+    
+### 타이머 기능 구현   
+
+
+```kotlin 
+object CustomTimer {
+
+    private var timerJob : Job = Job()
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
+
+```
+    - 타이머를 여러번 동작시켜도 하나의 타이머를 동작시키기 위해 싱글톤으로 정의하였습니다.
+    - 사용자가 원하는 시점에 타이머를 동작시키기위해 하나의 Job과 하나의 Coroutine Scope 으로 관리됩니다.
+
+
+
+```kotlin 
+    fun setTimerState(state: CustomTimerState, lastResumedTime : String? = null ) {
+        val startDate = lastResumedTime?.let { SimpleDateFormat("HH:mm:ss").parse(it) }
+
+        if ( lastResumedTime != null ) {
+            if (startDate != null)  this.timerCount = startDate.time.toLong()
+        } else {
+            this.timerCount = MAX_TIME
+        }
+
+        when (state) {
+            is CustomTimerState.Start ->  startTimerJob()
+            is CustomTimerState.Stop -> stopTimerJob()
+        }
+    }
+
+```
+    - 타이머를 동작시키는 메소드 입니다. 사용자는 동작시간을 정할 수 있으며, 없다면 기본 60초로 셋팅됩니다.
+
+```kotlin 
+    private fun startTimerJob(){
+        if (timerJob.isActive) timerJob.cancel()
+        Log.i("CustomTimer","타이머 시작  "+ timerJob.key)
+
+        timerJob = coroutineScope.launch {
+            withContext(Dispatchers.IO) {
+                this@CustomTimer.isActive = true
+                while (timerCount >= 0) {
+                    delay(1000L)
+                    timerCount -= 1000L
+                    formatTime = SimpleDateFormat(" HH:mm:ss").format(Date(timerCount))
+                    Log.i("CustomTimer 경과시간 ", formatTime + "@@@@@@@@@" + timerJob.key)
+                }
+                this@CustomTimer.isActive = false
+            }
+        }
+
+
+    }
+
+```
+
+
+    - 타이머 Start 구현부분 입니다. 1초간격으로 카운트다운되며, 진행시간을 저장합니다.
+    - 불려진 이후 다시 불려진다면 초기 설정한 카운트다운 값으로 다시 진행됩니다.
+    
+<img width="625" alt="image" src="https://user-images.githubusercontent.com/95750706/193133589-65cbdd11-1eaa-4b09-b7f7-7858e6f39f3e.png">
+
+```kotlin 
+    private fun stopTimerJob():String{
+        isActive = false
+        Log.i("CustomTimer ","타이머 정지  " + timerJob.key)
+        if (timerJob.isActive) timerJob.cancel()
+        return SimpleDateFormat(" HH:mm:ss").format(Date(timerCount))
+    }
+```
+    - 타이머 Stop 구현부분 입니다. 
+    - 만일 타이머가 시작하기 전이나, 타이머가 종료된 이후에도 불려지는 경우 등 예상치 못한 이슈를 캐치하기 위해 타이머의 Active 상태를 검증합니다.
+
+
+
+
+
+-------------------
+
 
 ## Convention 
 
