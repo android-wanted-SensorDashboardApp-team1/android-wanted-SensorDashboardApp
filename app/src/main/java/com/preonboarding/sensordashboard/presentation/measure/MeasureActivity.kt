@@ -1,18 +1,15 @@
 package com.preonboarding.sensordashboard.presentation.measure
 
-import android.content.Context
 import android.graphics.Color
-import android.hardware.Sensor
-import android.hardware.SensorManager
 import android.os.Bundle
+import android.os.CountDownTimer
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.get
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.github.mikephil.charting.components.Legend
-import com.github.mikephil.charting.components.LegendEntry
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
@@ -22,19 +19,12 @@ import com.preonboarding.sensordashboard.R
 import com.preonboarding.sensordashboard.databinding.ActivityMeasureBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import java.util.*
 
 @AndroidEntryPoint
 class MeasureActivity : AppCompatActivity() {
     private val viewModel: MeasureViewModel by viewModels()
     private val binding by lazy { ActivityMeasureBinding.inflate(layoutInflater) }
-    private val sensorManager by lazy { getSystemService(Context.SENSOR_SERVICE) as SensorManager }
-    private val gyroScope by lazy { sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) }
-    private val accelerometer by lazy { sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) }
-    private val timer by lazy { Timer() }
-    private val TAG = "MeasureActivity"
-    var gsensorCount = 0
-    var ssensorCount = 0
+    private lateinit var time: CountDownTimer
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,47 +42,66 @@ class MeasureActivity : AppCompatActivity() {
                 R.id.radio_button_acc -> {
                     type = "Acc"
                     initChart()
+                    binding.tvX.setText(R.string.measure_x_init)
+                    binding.tvY.setText(R.string.measure_y_init)
+                    binding.tvZ.setText(R.string.measure_z_init)
                 }
                 R.id.radio_button_gyro -> {
                     type = "Gyro"
                     initChart()
+                    binding.tvX.setText(R.string.measure_x_init)
+                    binding.tvY.setText(R.string.measure_y_init)
+                    binding.tvZ.setText(R.string.measure_z_init)
                 }
             }
         }
         tvMeasure.setOnClickListener {
-            var count = 1
-            radioGroup.get(0).isEnabled = false
-            radioGroup.get(1).isEnabled = false
-//            timer.schedule(
-//                object : TimerTask() {
-//                    override fun run() {
-//                        count++
-//                        if (count == 60) {
-//                            timer.cancel()
-// //                            sensorManager.unregisterListener(this@MeasureActivity)
-//                            radioGroup.get(0).isEnabled = true
-//                            radioGroup.get(1).isEnabled = true
-//                        }
-//                    }
-//                },
-//                1000,
-//                1000
-//            )
+            radioGroup[0].isEnabled = false
+            radioGroup[1].isEnabled = false
+            time = object : CountDownTimer(60000, 100) {
+                override fun onTick(tick: Long) {
+                    viewModel.measureTime = tick
+                }
+
+                override fun onFinish() {
+                    viewModel.pressStop()
+                    radioGroup[0].isEnabled = true
+                    radioGroup[1].isEnabled = true
+                }
+            }.start()
             tvStop.visibility = 0
             when (type) {
                 "Acc" -> {
+                    viewModel.updateCurrentSensorType("Acc")
+                    viewModel.clearSensorDataList()
                     viewModel.measureAccSensor()
                 }
                 "Gyro" -> {
+                    viewModel.updateCurrentSensorType("Gyro")
+                    viewModel.clearSensorDataList()
                     viewModel.measureGyroSensor()
                 }
             }
         }
         tvStop.setOnClickListener {
-//            sensorManager.unregisterListener(this@MeasureActivity)
-            radioGroup.get(0).isEnabled = true
-            radioGroup.get(1).isEnabled = true
+            time.onFinish()
+            time.cancel()
+
+            radioGroup[0].isEnabled = true
+            radioGroup[1].isEnabled = true
             tvStop.visibility = 4
+        }
+
+        tvSave.setOnClickListener {
+            if (viewModel.sensorDataList.isNotEmpty()) {
+                Toast.makeText(this@MeasureActivity, R.string.measure_empty, Toast.LENGTH_SHORT)
+                    .show()
+            } else {
+                viewModel.saveSensorData()
+            }
+        }
+        ivBack.setOnClickListener { // 뒤로 가기
+            finish()
         }
     }
 
@@ -100,11 +109,14 @@ class MeasureActivity : AppCompatActivity() {
         launch {
             repeatOnLifecycle(state = Lifecycle.State.RESUMED) {
                 with(viewModel) {
-                    measuredSensorData.collect { sensorData ->
-                        addSensorData(sensorData)
-                        addEntry(sensorData.x.toDouble(), label = "x")
-                        addEntry(sensorData.y.toDouble(), label = "y")
-                        addEntry(sensorData.z.toDouble(), label = "z")
+                    measuredSensorData.collect { sensorAxisData ->
+                        addSensorAxisData(sensorAxisData)
+                        addEntry(sensorAxisData.x.toDouble(), label = "x")
+                        addEntry(sensorAxisData.y.toDouble(), label = "y")
+                        addEntry(sensorAxisData.z.toDouble(), label = "z")
+                        binding.tvX.text = "x ${sensorAxisData.x.toDouble()}"
+                        binding.tvY.text = "y ${sensorAxisData.y.toDouble()}"
+                        binding.tvZ.text = "z ${sensorAxisData.z.toDouble()}"
                     }
                 }
             }
@@ -148,25 +160,6 @@ class MeasureActivity : AppCompatActivity() {
         dataSets.add(zChartDataSet)
         val chartData = LineData(dataSets)
 
-        val legend = legend
-        legend.isEnabled = true
-        legend.verticalAlignment = Legend.LegendVerticalAlignment.TOP
-        legend.horizontalAlignment = Legend.LegendHorizontalAlignment.LEFT
-        legend.textSize = 15f
-        legend.xEntrySpace = 15f
-        val legendEntryX = LegendEntry()
-        legendEntryX.formColor = Color.RED
-        legendEntryX.label = "x"
-        val legendEntryY = LegendEntry()
-        legendEntryY.formColor = Color.GREEN
-        legendEntryY.label = "y"
-
-        val legendEntryZ = LegendEntry()
-        legendEntryZ.formColor = Color.BLUE
-        legendEntryZ.label = "z"
-        val legendList = listOf(legendEntryX, legendEntryY, legendEntryZ)
-        legend.setCustom(legendList)
-
         data = chartData
 
         invalidate()
@@ -187,15 +180,15 @@ class MeasureActivity : AppCompatActivity() {
     private fun addEntry(num: Double, label: String) = with(binding.lineChart) {
         when (label) {
             "x" -> {
-                val set = data.getDataSetByLabel("x", false)
+                val set = data.getDataSetByLabel(label, false)
                 data.addEntry(Entry(set.entryCount.toFloat(), num.toFloat()), 0)
             }
             "y" -> {
-                val set = data.getDataSetByLabel("y", false)
+                val set = data.getDataSetByLabel(label, false)
                 data.addEntry(Entry(set.entryCount.toFloat(), num.toFloat()), 1)
             }
             "z" -> {
-                val set = data.getDataSetByLabel("z", false)
+                val set = data.getDataSetByLabel(label, false)
                 data.addEntry(Entry(set.entryCount.toFloat(), num.toFloat()), 2)
             }
         }
@@ -203,39 +196,5 @@ class MeasureActivity : AppCompatActivity() {
 
         notifyDataSetChanged()
         moveViewTo(data.entryCount.toFloat(), 50f, YAxis.AxisDependency.LEFT)
-    }
-
-//    override fun onSensorChanged(sensorEvent: SensorEvent) {
-//        val sensor = sensorEvent.sensor
-//
-//        if (sensor.type == Sensor.TYPE_GYROSCOPE) {
-//            val gyroX = (sensorEvent.values[0] * 1000)
-//            val gyroY = (sensorEvent.values[1] * 1000)
-//            val gyroZ = (sensorEvent.values[2] * 1000)
-//
-//            addEntry(gyroX.toDouble(), label = "x")
-//            addEntry(gyroY.toDouble(), label = "y")
-//            addEntry(gyroZ.toDouble(), label = "z")
-//
-//            gsensorCount++
-//        }
-//        if (sensor.type == Sensor.TYPE_ACCELEROMETER) {
-//            val acceleX = sensorEvent.values[0]
-//            val acceleY = sensorEvent.values[1]
-//            val acceleZ = sensorEvent.values[2]
-//
-//            addEntry(acceleX.toDouble(), label = "x")
-//            addEntry(acceleY.toDouble(), label = "y")
-//            addEntry(acceleZ.toDouble(), label = "z")
-//            ssensorCount++
-//        }
-//    }
-//
-//    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
-//    }
-
-    override fun onPause() {
-        super.onPause()
-//        sensorManager.unregisterListener(this)
     }
 }
