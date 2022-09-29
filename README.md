@@ -160,8 +160,7 @@
 
 
 ### Measure Activity
-<img src="https://user-images.githubusercontent.com/62296097/193047349-a8dc
-1079-f9a7-4a74-aaea-d56853189b06.gif" width="300" height="600" />
+<img src="https://user-images.githubusercontent.com/62296097/193047349-a8dc1079-f9a7-4a74-aaea-d56853189b06.gif" width="300" height="600" />
 
 - RadioGroup을 사용하여 GyroScope와 가속도계를 지정할 수 있도록 하였습니다.
 - 측정 버튼을 클릭시 RadioGroup을 선택할 수 없도록 하였습니다.
