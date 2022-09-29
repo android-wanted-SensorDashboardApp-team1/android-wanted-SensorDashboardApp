@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MeasureActivity">
+    tools:context=".presentation.measure.MeasureActivity">
 
 
     <RadioGroup
@@ -64,6 +64,7 @@
         app:layout_constraintStart_toStartOf="parent"
         android:textSize="20sp"
         android:textColor="@color/teal_700"
+        android:visibility="invisible"
         android:text="정지"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
