@@ -2,15 +2,19 @@ package com.preonboarding.sensordashboard.presentation.measure
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.preonboarding.sensordashboard.domain.model.SensorAxisData
 import com.preonboarding.sensordashboard.domain.model.SensorData
 import com.preonboarding.sensordashboard.domain.model.SensorType
 import com.preonboarding.sensordashboard.domain.usecase.AccSensorUseCase
 import com.preonboarding.sensordashboard.domain.usecase.GyroSensorUseCase
 import com.preonboarding.sensordashboard.domain.usecase.RoomUseCase
+import com.preonboarding.sensordashboard.util.DateUtil.getCurrentTime
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.text.DecimalFormat
 import javax.inject.Inject
 
 /**
@@ -25,43 +29,92 @@ class MeasureViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _measuredSensorData = MutableStateFlow(
-        SensorData(
+        SensorAxisData(
             0f,
             0f,
-            0f,
-            SensorType.EMPTY,
-            ""
+            0f
         )
     )
+
+    private val _pressStop = MutableSharedFlow<Unit>(
+        replay = 0,
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    private val pressStop: SharedFlow<Unit> = _pressStop.asSharedFlow()
+
+    private var currentSensorType = "Acc"
+
     val measuredSensorData = _measuredSensorData.asStateFlow()
 
-    private val sensorDataList = mutableListOf<SensorData>()
+    val sensorDataList = mutableListOf<SensorAxisData>()
+
+    var measureTime: Long = 0
 
     fun measureGyroSensor() {
+        val job = viewModelScope.launch {
+            gyroSensorUseCase.getGyroFlow().collect { sensorAxisData ->
+                _measuredSensorData.value = sensorAxisData
+            }
+        }
         viewModelScope.launch {
-            gyroSensorUseCase.getGyroFlow().collect { sensorData ->
-                _measuredSensorData.value = sensorData
+            _pressStop.collect {
+                job.cancelAndJoin()
             }
         }
     }
 
     fun measureAccSensor() {
+        val job = viewModelScope.launch {
+            accSensorUseCase.getAccFlow().collect { sensorAxisData ->
+                _measuredSensorData.value = sensorAxisData
+            }
+        }
         viewModelScope.launch {
-            accSensorUseCase.getAccFlow().collect { sensorData ->
-                _measuredSensorData.value = sensorData
+            pressStop.collect {
+                job.cancelAndJoin()
             }
         }
     }
 
-    fun addSensorData(sensorData: SensorData) {
-        sensorDataList.add(sensorData)
+    fun addSensorAxisData(sensorAxisData: SensorAxisData) {
+        sensorDataList.add(sensorAxisData)
+    }
+
+    fun clearSensorDataList() {
+        sensorDataList.clear()
+    }
+
+    fun pressStop() {
+        viewModelScope.launch {
+            _pressStop.tryEmit(Unit)
+        }
+    }
+
+    fun updateCurrentSensorType(type: String) {
+        currentSensorType = type
     }
 
     fun saveSensorData() {
         viewModelScope.launch {
-            for (sensorData in sensorDataList) {
-                roomUseCase.insertSensorData(sensorData = sensorData)
-            }
+            var time = (60000 - measureTime) / 1000.0f
+            val df = DecimalFormat("#.#")
+            time = df.format(time).toFloat()
+            roomUseCase.insertSensorData(
+                SensorData.EMPTY.copy(
+                    dataList = sensorDataList,
+                    type = when (currentSensorType) {
+                        "Acc" -> {
+                            SensorType.ACC
+                        }
+                        else -> {
+                            SensorType.GYRO
+                        }
+                    },
+                    time = time,
+                    date = getCurrentTime()
+                )
+            )
         }
     }
 }
