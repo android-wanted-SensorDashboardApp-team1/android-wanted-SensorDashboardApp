@@ -9,6 +9,7 @@
     <string name="measure_gyro">Gyro</string>
     <string name="measure_acc">Acc</string>
     <string name="measure_empty">측정된 데이터가 없습니다.</string>
+    <string name="measure_save_success">저장에 성공했습니다.</string>
     <string name="measure_x_init">x 0.0</string>
     <string name="measure_y_init">y 0.0</string>
     <string name="measure_z_init">z 0.0</string>
