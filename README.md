@@ -148,6 +148,7 @@
 - Hilt로부터 제공되는 CoroutineSCope는 cancel을 제외하고 다른 Error가 발생하면 핸들링할 수없습니다. 따라서 ceh를 context에 포함한 Scope로 재구성하여 사용합니다. 
 - ceh에서 잡힌 error는 ErrorFlow를 통해 방출됩니다. 
 
+-------------------
 
 ## 김현국
 - 담당한 일
@@ -196,7 +197,6 @@ time = object : CountDownTimer(60000, 100) {
 - 측정 시간을 저장하기 위해서, CountDownTimer를 사용했습니다.
 - 최대 60초로 측정하며, countDonwInterval를 100ms로 지정하며 소수점 첫번째 단위까지 계산할 수 있도록 하였습니다.
 
-
 ### Acc & Gyro Data Collect
 ```kotlin
     measuredSensorData.collect sensorAxisData ->
@@ -215,6 +215,37 @@ time = object : CountDownTimer(60000, 100) {
 - 수집된 데이터를 저장하기 위해서 따로 List에 Sensor데이터를 저장했습니다.
 
 - 수집된 센서 데이터들은 Graph에 바인드 되며, TextView의 텍스트를 업데이트 하도록 하였습니다.
+
+
+-------------------
+
+
+## 한혜원
+- 담당한 일
+    - 첫번째 목록 페이지 구현
+- 기여한 점
+    - 첫번째 목록 페이지 화면 구성
+    - ItemTouchHelper를 이용해 swipe시 다시보기, 삭제 구현
+- 남은 작업
+    - swipe 동작이 매끄럽지 않고 불편하여 개선하기
+    - paging3 적용이 완료되면 합치기
+    - 두번째, 세번째 페이지가 완성되면 화면 전환 추가하기
+
+
+### 시연
+https://user-images.githubusercontent.com/35549958/193092306-73a2e060-4596-42d3-b3e1-498ace8d26b5.mp4
+
+### RecyclerViewAdapter
+![image](https://user-images.githubusercontent.com/35549958/193094023-a6c0f7e0-0cf6-4cbf-a15e-3ee284ca4fd6.png)
+- Adapter는 ItemTouchHelper를 상속받는 SwipeController 클래스와 ItemTouchHelperListener 인터페이스를 이용해 소통
+- Adapter 내부에 Interface를 추가하여 Activity에서 원하는 코드를 구현
+
+### MainActivity
+![image](https://user-images.githubusercontent.com/35549958/193094504-10e2ead3-986e-4d6f-a822-ff352432a3e2.png)
+- Adapter로 부터 아이템의 id를 받아서 viewmodel에게 전달, 아이템 삭제  
+
+-------------------
+
 
 ## Convention 
 
