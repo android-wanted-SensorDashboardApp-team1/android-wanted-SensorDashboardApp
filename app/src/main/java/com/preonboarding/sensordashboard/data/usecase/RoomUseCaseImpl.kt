@@ -3,9 +3,7 @@ package com.preonboarding.sensordashboard.data.usecase
 import com.preonboarding.sensordashboard.domain.model.SensorData
 import com.preonboarding.sensordashboard.domain.repository.SensorRepository
 import com.preonboarding.sensordashboard.domain.usecase.RoomUseCase
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class RoomUseCaseImpl @Inject constructor(
@@ -16,7 +14,11 @@ class RoomUseCaseImpl @Inject constructor(
         sensorRepository.insertSensorData(sensorData)
     }
 
-    override fun getSensorDataFlow(): Flow<List<SensorData>> {
+    override fun getSensorDataFlow(): Flow<List<SensorData?>> {
         return sensorRepository.getSensorDataFlow()
+    }
+
+    override suspend fun deleteSensorData(id: Long) {
+        sensorRepository.deleteSensorData(id)
     }
 }

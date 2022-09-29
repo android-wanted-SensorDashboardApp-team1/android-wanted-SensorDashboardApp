@@ -1,5 +1,6 @@
 package com.preonboarding.sensordashboard.data.repository
 
+import com.preonboarding.sensordashboard.domain.model.SensorAxisData
 import com.preonboarding.sensordashboard.domain.model.SensorData
 import com.preonboarding.sensordashboard.domain.repository.SensorRepository
 import kotlinx.coroutines.flow.Flow
@@ -10,11 +11,11 @@ class SensorRepositoryImpl @Inject constructor(
     private val localDataSource: LocalDataSource
 ) : SensorRepository {
 
-    override fun getAccFlow(): Flow<SensorData> {
+    override fun getAccFlow(): Flow<SensorAxisData> {
         return localDataSource.getAccFlow()
     }
 
-    override fun getGyroFlow(): Flow<SensorData> {
+    override fun getGyroFlow(): Flow<SensorAxisData> {
         return localDataSource.getGyroFlow()
     }
 
@@ -26,7 +27,11 @@ class SensorRepositoryImpl @Inject constructor(
         localDataSource.insertSensorData(sensorData)
     }
 
-    override fun getSensorDataFlow(): Flow<List<SensorData>> {
+    override fun getSensorDataFlow(): Flow<List<SensorData?>> {
         return localDataSource.getSensorDataFlow()
+    }
+
+    override suspend fun deleteSensorData(id: Long) {
+        localDataSource.deleteSensorData(id)
     }
 }

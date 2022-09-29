@@ -4,7 +4,9 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.preonboarding.sensordashboard.R
 import com.preonboarding.sensordashboard.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -17,7 +19,7 @@ class MainActivity : AppCompatActivity() {
     private val sensorViewModel: SensorViewModel by viewModels()
 
     private lateinit var binding: ActivityMainBinding
-    private val recyclerViewAdapter = MainRecyclerViewAdapter()
+    private lateinit var recyclerViewAdapter: MainRecyclerViewAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,11 +27,14 @@ class MainActivity : AppCompatActivity() {
         binding.viewModel = sensorViewModel
         binding.lifecycleOwner = this
         binding.recyclerviewMain.apply {
+            recyclerViewAdapter = MainRecyclerViewAdapter(sensorViewModel)
             adapter = recyclerViewAdapter
         }
         lifecycleScope.launch {
-            sensorViewModel.sensorsFlow.collectLatest { sensors ->
-                (binding.recyclerviewMain.adapter as MainRecyclerViewAdapter).submitList(sensors)
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                sensorViewModel.sensorsFlow.collectLatest { sensors ->
+                    (binding.recyclerviewMain.adapter as MainRecyclerViewAdapter).submitList(sensors)
+                }
             }
         }
     }

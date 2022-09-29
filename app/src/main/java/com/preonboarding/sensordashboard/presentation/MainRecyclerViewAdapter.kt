@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.preonboarding.sensordashboard.databinding.ItemMainRecyclerviewBinding
 import com.preonboarding.sensordashboard.domain.model.SensorData
 
-class MainRecyclerViewAdapter :
+class MainRecyclerViewAdapter(val viewModel: SensorViewModel) :
     ListAdapter<SensorData, MainRecyclerViewAdapter.ViewHolder>(SensorDiffCallback()) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding =
@@ -21,9 +21,10 @@ class MainRecyclerViewAdapter :
         holder.bind(item)
     }
 
-    class ViewHolder(private val binding: ItemMainRecyclerviewBinding) :
+    inner class ViewHolder(private val binding: ItemMainRecyclerviewBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(sensorData: SensorData) {
+            binding.viewModel = viewModel
             binding.sensor = sensorData
             binding.executePendingBindings()
         }
@@ -32,7 +33,7 @@ class MainRecyclerViewAdapter :
 
 class SensorDiffCallback : DiffUtil.ItemCallback<SensorData>() {
     override fun areItemsTheSame(oldItem: SensorData, newItem: SensorData): Boolean {
-        return oldItem == newItem
+        return oldItem.id == newItem.id
     }
 
     override fun areContentsTheSame(oldItem: SensorData, newItem: SensorData): Boolean {

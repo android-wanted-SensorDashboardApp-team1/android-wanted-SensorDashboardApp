@@ -1,29 +1,36 @@
 package com.preonboarding.sensordashboard.data.repository
 
-import android.hardware.*
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import androidx.room.withTransaction
 import com.preonboarding.sensordashboard.data.dto.AxisData
 import com.preonboarding.sensordashboard.data.room.SensorDataBase
 import com.preonboarding.sensordashboard.di.coroutine.SensorScopeQualifier
 import com.preonboarding.sensordashboard.di.sensor.AccSensorQualifier
 import com.preonboarding.sensordashboard.di.sensor.GyroSensorQualifier
+import com.preonboarding.sensordashboard.domain.model.SensorAxisData
 import com.preonboarding.sensordashboard.domain.model.SensorData
 import com.preonboarding.sensordashboard.domain.model.SensorType
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 class LocalDataSource @Inject constructor(
     private val sensorManager: SensorManager,
     private val sensorDataBase: SensorDataBase,
+    private val json: Json,
     @AccSensorQualifier private val accSensor: Sensor,
     @GyroSensorQualifier private val gyroSensor: Sensor,
     @SensorScopeQualifier private val coroutineScope: CoroutineScope
@@ -43,7 +50,9 @@ class LocalDataSource @Inject constructor(
 
     private val sensorDao = sensorDataBase.sensorDao()
 
-    fun getAccFlow(): Flow<SensorData> {
+    private val SENSOR_DELAY = 100000 //10hz to microsecond
+
+    fun getAccFlow(): Flow<SensorAxisData> {
         return callbackFlow {
             var listener: SensorEventListener? = object : SensorEventListener {
                 override fun onSensorChanged(event: SensorEvent?) {
@@ -55,10 +64,16 @@ class LocalDataSource @Inject constructor(
                             y = array[1],
                             z = array[2],
                             type = SensorType.ACC
-                        ).toSensorData()
+                        ).toSensorAxisData()
 
-                        sensorScope.launch {
-                            send(sensorData)
+                        trySend(sensorData).onFailure { Error ->
+                            Error?.let { throwable ->
+                                close() // channel 종료
+
+                                sensorScope.launch {
+                                    errorFlow.emit(throwable)
+                                }
+                            }
                         }
                     }
                 }
@@ -69,14 +84,18 @@ class LocalDataSource @Inject constructor(
             sensorManager.registerListener(
                 listener,
                 accSensor,
-                SensorManager.SENSOR_DELAY_NORMAL
+                SENSOR_DELAY
             )
 
-            awaitClose { listener = null }
+            awaitClose {
+                sensorManager.unregisterListener(listener)
+                listener = null
+            }
         }
     }
 
-    fun getGyroFlow(): Flow<SensorData> {
+    fun getGyroFlow(): Flow<SensorAxisData> {
+        var i = 0
         return callbackFlow {
             var listener: SensorEventListener? = object : SensorEventListener {
                 override fun onSensorChanged(event: SensorEvent?) {
@@ -91,10 +110,16 @@ class LocalDataSource @Inject constructor(
                             y = array[1],
                             z = array[2],
                             type = SensorType.GYRO
-                        ).toSensorData()
+                        ).toSensorAxisData()
 
-                        sensorScope.launch {
-                            send(sensorData)
+                        trySend(sensorData).onFailure { Error ->
+                            Error?.let { throwable ->
+                                close() // channel 종료
+
+                                sensorScope.launch {
+                                    errorFlow.emit(throwable)
+                                }
+                            }
                         }
                     }
                 }
@@ -105,29 +130,38 @@ class LocalDataSource @Inject constructor(
             sensorManager.registerListener(
                 listener,
                 gyroSensor,
-                SensorManager.SENSOR_DELAY_NORMAL
+                SENSOR_DELAY
             )
 
-            awaitClose { listener = null }
+            awaitClose {
+                sensorManager.unregisterListener(listener)
+                listener = null
+            }
         }
     }
 
     suspend fun insertSensorData(sensorData: SensorData) {
         sensorDataBase.withTransaction {
-            sensorDao.insertSensorData(sensorData.toEntity())
+            sensorDao.insertSensorData(sensorData.toEntity(json))
         }
     }
 
-    fun getSensorDataFlow(): Flow<List<SensorData>> {
+    fun getSensorDataFlow(): Flow<List<SensorData?>> {
         return sensorDao.getSensorDataFlow().map { list ->
             list.map {
-                it.toModel()
+                it.toModel(json)
             }
         }
     }
 
     fun getErrorFlow(): MutableSharedFlow<Throwable> {
         return errorFlow
+    }
+
+    suspend fun deleteSensorData(id: Long) {
+        sensorDataBase.withTransaction {
+            sensorDao.deleteSensorData(id)
+        }
     }
 
 }

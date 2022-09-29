@@ -8,13 +8,11 @@ object BindingAdapterUtil {
     @JvmStatic
     @BindingAdapter("setType")
     fun setType(view: TextView, type: SensorType) {
-        view.apply {
-            text = when (type) {
-                SensorType.ACC -> "Accelerometer"
-                SensorType.GYRO -> "Gyro"
-                else -> {
-                    ""
-                }
+        view.text = when (type) {
+            SensorType.ACC -> "Accelerometer"
+            SensorType.GYRO -> "Gyro"
+            else -> {
+                ""
             }
         }
     }

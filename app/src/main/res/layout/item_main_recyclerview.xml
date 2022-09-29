@@ -6,6 +6,10 @@
         <import type="com.preonboarding.sensordashboard.domain.model.SensorType" />
 
         <variable
+            name="viewModel"
+            type="com.preonboarding.sensordashboard.presentation.SensorViewModel" />
+
+        <variable
             name="sensor"
             type="com.preonboarding.sensordashboard.domain.model.SensorData" />
     </data>
@@ -31,7 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:textColor="@color/black"
-            android:textSize="16sp"
+            android:textSize="20sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textview_itemmain_date"
             app:setType="@{sensor.type}" />
@@ -40,13 +44,35 @@
             android:id="@+id/textview_itemmain_time"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
+            android:layout_marginEnd="10dp"
             android:gravity="center_vertical"
-            android:text="item.time 수정해야함"
+            android:text="@{String.valueOf(sensor.time)}"
             android:textColor="@color/black"
             android:textSize="25sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/button_itemmain_play"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <Button
+            android:id="@+id/button_itemmain_play"
+            android:layout_width="50dp"
+            android:layout_height="0dp"
+            android:layout_marginEnd="10dp"
+            android:text="P"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/button_itemmain_delete"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/button_itemmain_delete"
+            android:layout_width="50dp"
+            android:layout_height="0dp"
+            android:onClick="@{()->viewModel.deleteSensorData(sensor.id)}"
+            android:text="D"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -1,6 +1,6 @@
 package com.preonboarding.sensordashboard.data.usecase
 
-import com.preonboarding.sensordashboard.domain.model.SensorData
+import com.preonboarding.sensordashboard.domain.model.SensorAxisData
 import com.preonboarding.sensordashboard.domain.repository.SensorRepository
 import com.preonboarding.sensordashboard.domain.usecase.GyroSensorUseCase
 import kotlinx.coroutines.flow.Flow
@@ -10,7 +10,7 @@ class GyroSensorUseCaseImpl @Inject constructor(
     private val repository: SensorRepository
 ) : GyroSensorUseCase {
 
-    override fun getGyroFlow(): Flow<SensorData> {
+    override fun getGyroFlow(): Flow<SensorAxisData> {
         return repository.getGyroFlow()
     }
 }

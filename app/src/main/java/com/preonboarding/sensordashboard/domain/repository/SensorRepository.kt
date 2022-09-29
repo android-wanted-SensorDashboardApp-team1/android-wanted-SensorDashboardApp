@@ -1,18 +1,21 @@
 package com.preonboarding.sensordashboard.domain.repository
 
+import com.preonboarding.sensordashboard.domain.model.SensorAxisData
 import com.preonboarding.sensordashboard.domain.model.SensorData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 interface SensorRepository {
 
-    fun getAccFlow(): Flow<SensorData>
+    fun getAccFlow(): Flow<SensorAxisData>
 
-    fun getGyroFlow(): Flow<SensorData>
+    fun getGyroFlow(): Flow<SensorAxisData>
 
     fun errorFlow(): MutableSharedFlow<Throwable>
 
     suspend fun insertSensorData(sensorData: SensorData)
 
-    fun getSensorDataFlow(): Flow<List<SensorData>>
+    fun getSensorDataFlow(): Flow<List<SensorData?>>
+
+    suspend fun deleteSensorData(id: Long)
 }
