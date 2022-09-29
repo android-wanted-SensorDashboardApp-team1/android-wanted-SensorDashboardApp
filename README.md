@@ -149,7 +149,7 @@
 - ceh에서 잡힌 error는 ErrorFlow를 통해 방출됩니다. 
 
 
-# 김현국
+## 김현국
 - 담당한 일
     - Sensor Graph 구현
 - 기여한 점
@@ -159,7 +159,7 @@
     - 그래프를 직접 구현하지 않고, library를 사용한 부분이 아쉽습니다.
 
 
-# Measure Activity
+### Measure Activity
 <img src="https://user-images.githubusercontent.com/62296097/193047349-a8dc
 1079-f9a7-4a74-aaea-d56853189b06.gif" width="300" height="600" />
 
@@ -171,7 +171,7 @@
 - 저장버튼 클릭시, 측정한 데이터가 있을 경우, 성공 토스트를 출력하며, 측정한 데이터가 없을 경우, 측정한 데이터가 없다는 토스트를 출력합니다.
 
 
-## 측정 시간 카운트 다운
+### 측정 시간 카운트 다운
 ```kotlin 
 time = object : CountDownTimer(60000, 100) {
                 override fun onTick(tick: Long) {
@@ -198,7 +198,7 @@ time = object : CountDownTimer(60000, 100) {
 - 최대 60초로 측정하며, countDonwInterval를 100ms로 지정하며 소수점 첫번째 단위까지 계산할 수 있도록 하였습니다.
 
 
-## Acc & Gyro Data Collect
+### Acc & Gyro Data Collect
 ```kotlin
     measuredSensorData.collect sensorAxisData ->
         addSensorAxisData(sensorAxisData)
