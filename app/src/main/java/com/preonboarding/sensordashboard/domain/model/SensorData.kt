@@ -3,6 +3,7 @@ package com.preonboarding.sensordashboard.domain.model
 import com.preonboarding.sensordashboard.util.DateUtil
 
 data class SensorData(
+    val id: Long,
     val dataList: List<SensorAxisData>,
     val type: SensorType,
     val date: String,
@@ -11,6 +12,7 @@ data class SensorData(
 
     companion object {
         val EMPTY = SensorData(
+            id = 0,
             dataList = mutableListOf(),
             type = SensorType.EMPTY,
             date = DateUtil.getCurrentTime(),

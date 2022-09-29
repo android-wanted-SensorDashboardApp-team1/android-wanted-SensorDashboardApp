@@ -10,6 +10,7 @@ import kotlinx.serialization.json.Json
 
 
 fun SensorDataEntity.toModel(json: Json) = SensorData(
+    id = this.id,
     dataList = stringToSensorList(json, this.dataList).map { it.toModel() },
     type = this.type,
     date = this.date,
