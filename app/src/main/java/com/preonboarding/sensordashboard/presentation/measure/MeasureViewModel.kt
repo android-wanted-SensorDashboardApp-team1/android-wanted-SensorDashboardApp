@@ -82,7 +82,7 @@ class MeasureViewModel @Inject constructor(
     }
 
     fun clearSensorDataList() {
-        sensorDataList.clear()
+        sensorDataList.removeAll { true }
     }
 
     fun pressStop() {
