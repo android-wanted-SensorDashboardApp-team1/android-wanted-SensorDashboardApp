@@ -1,15 +1,16 @@
-package com.preonboarding.sensordashboard
+package com.preonboarding.sensordashboard.presentation.measure
 
 import android.content.Context
 import android.graphics.Color
 import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
-import android.util.Log
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.get
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.components.LegendEntry
 import com.github.mikephil.charting.components.YAxis
@@ -19,9 +20,13 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import com.preonboarding.sensordashboard.R
 import com.preonboarding.sensordashboard.databinding.ActivityMeasureBinding
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import java.util.*
 
-class MeasureActivity : AppCompatActivity(), SensorEventListener {
+@AndroidEntryPoint
+class MeasureActivity : AppCompatActivity() {
+    private val viewModel: MeasureViewModel by viewModels()
     private val binding by lazy { ActivityMeasureBinding.inflate(layoutInflater) }
     private val sensorManager by lazy { getSystemService(Context.SENSOR_SERVICE) as SensorManager }
     private val gyroScope by lazy { sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) }
@@ -36,6 +41,7 @@ class MeasureActivity : AppCompatActivity(), SensorEventListener {
         setContentView(binding.root)
         initListener()
         initChart()
+        observeSensor()
     }
 
     private fun initListener() = with(binding) {
@@ -57,44 +63,51 @@ class MeasureActivity : AppCompatActivity(), SensorEventListener {
             var count = 1
             radioGroup.get(0).isEnabled = false
             radioGroup.get(1).isEnabled = false
-            timer.schedule(
-                object : TimerTask() {
-                    override fun run() {
-                        count++
-                        if (count == 60) {
-                            timer.cancel()
-                            sensorManager.unregisterListener(this@MeasureActivity)
-                            radioGroup.get(0).isEnabled = true
-                            radioGroup.get(1).isEnabled = true
-                            Log.d(TAG, "G Sensor $gsensorCount")
-                            Log.d(TAG, "S Sensor $ssensorCount")
-                        }
-                    }
-                },
-                1000,
-                1000
-            )
+//            timer.schedule(
+//                object : TimerTask() {
+//                    override fun run() {
+//                        count++
+//                        if (count == 60) {
+//                            timer.cancel()
+// //                            sensorManager.unregisterListener(this@MeasureActivity)
+//                            radioGroup.get(0).isEnabled = true
+//                            radioGroup.get(1).isEnabled = true
+//                        }
+//                    }
+//                },
+//                1000,
+//                1000
+//            )
+            tvStop.visibility = 0
             when (type) {
                 "Acc" -> {
-                    sensorManager.registerListener(
-                        this@MeasureActivity,
-                        accelerometer,
-                        100000
-                    )
+                    viewModel.measureAccSensor()
                 }
                 "Gyro" -> {
-                    sensorManager.registerListener(
-                        this@MeasureActivity,
-                        gyroScope,
-                        SensorManager.SENSOR_DELAY_NORMAL
-                    )
+                    viewModel.measureGyroSensor()
                 }
             }
         }
         tvStop.setOnClickListener {
-            sensorManager.unregisterListener(this@MeasureActivity)
+//            sensorManager.unregisterListener(this@MeasureActivity)
             radioGroup.get(0).isEnabled = true
             radioGroup.get(1).isEnabled = true
+            tvStop.visibility = 4
+        }
+    }
+
+    private fun observeSensor() = with(lifecycleScope) {
+        launch {
+            repeatOnLifecycle(state = Lifecycle.State.RESUMED) {
+                with(viewModel) {
+                    measuredSensorData.collect { sensorData ->
+                        addSensorData(sensorData)
+                        addEntry(sensorData.x.toDouble(), label = "x")
+                        addEntry(sensorData.y.toDouble(), label = "y")
+                        addEntry(sensorData.z.toDouble(), label = "z")
+                    }
+                }
+            }
         }
     }
 
@@ -192,37 +205,37 @@ class MeasureActivity : AppCompatActivity(), SensorEventListener {
         moveViewTo(data.entryCount.toFloat(), 50f, YAxis.AxisDependency.LEFT)
     }
 
-    override fun onSensorChanged(sensorEvent: SensorEvent) {
-        val sensor = sensorEvent.sensor
-
-        if (sensor.type == Sensor.TYPE_GYROSCOPE) {
-            val gyroX = (sensorEvent.values[0] * 1000)
-            val gyroY = (sensorEvent.values[1] * 1000)
-            val gyroZ = (sensorEvent.values[2] * 1000)
-
-            addEntry(gyroX.toDouble(), label = "x")
-            addEntry(gyroY.toDouble(), label = "y")
-            addEntry(gyroZ.toDouble(), label = "z")
-
-            gsensorCount++
-        }
-        if (sensor.type == Sensor.TYPE_ACCELEROMETER) {
-            val acceleX = sensorEvent.values[0]
-            val acceleY = sensorEvent.values[1]
-            val acceleZ = sensorEvent.values[2]
-
-            addEntry(acceleX.toDouble(), label = "x")
-            addEntry(acceleY.toDouble(), label = "y")
-            addEntry(acceleZ.toDouble(), label = "z")
-            ssensorCount++
-        }
-    }
-
-    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
-    }
+//    override fun onSensorChanged(sensorEvent: SensorEvent) {
+//        val sensor = sensorEvent.sensor
+//
+//        if (sensor.type == Sensor.TYPE_GYROSCOPE) {
+//            val gyroX = (sensorEvent.values[0] * 1000)
+//            val gyroY = (sensorEvent.values[1] * 1000)
+//            val gyroZ = (sensorEvent.values[2] * 1000)
+//
+//            addEntry(gyroX.toDouble(), label = "x")
+//            addEntry(gyroY.toDouble(), label = "y")
+//            addEntry(gyroZ.toDouble(), label = "z")
+//
+//            gsensorCount++
+//        }
+//        if (sensor.type == Sensor.TYPE_ACCELEROMETER) {
+//            val acceleX = sensorEvent.values[0]
+//            val acceleY = sensorEvent.values[1]
+//            val acceleZ = sensorEvent.values[2]
+//
+//            addEntry(acceleX.toDouble(), label = "x")
+//            addEntry(acceleY.toDouble(), label = "y")
+//            addEntry(acceleZ.toDouble(), label = "z")
+//            ssensorCount++
+//        }
+//    }
+//
+//    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
+//    }
 
     override fun onPause() {
         super.onPause()
-        sensorManager.unregisterListener(this)
+//        sensorManager.unregisterListener(this)
     }
 }
