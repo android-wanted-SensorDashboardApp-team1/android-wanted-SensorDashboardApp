@@ -10,6 +10,11 @@ import com.preonboarding.sensordashboard.domain.usecase.ErrorUseCase
 import com.preonboarding.sensordashboard.domain.usecase.GyroSensorUseCase
 import com.preonboarding.sensordashboard.domain.usecase.RoomUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -24,26 +29,21 @@ class SensorViewModel @Inject constructor(
     private val roomUseCase: RoomUseCase
 ) : ViewModel() {
 
-    val accSensorFlow = accSensorUseCase.getAccFlow()
-    val gyroSensorFlow = gyroSensorUseCase.getGyroFlow()
-
     private val errorFlow = errorUseCase.getErrorFlow()
 
     private val accSensorDataList = mutableListOf<SensorAxisData>()
 
     init {
-//        viewModelScope.launch { //Sensor data 수집
-//            accSensorFlow
+// todo Sensor관련된 Flow를 취소할 수 있는 예시에요. 불필요 시, 제거 필수!!
+//        val job = viewModelScope.launch { //Sensor data 수집
+//            accSensorUseCase.getAccFlow()
 //                .onEach { accSensorDataList.add(it) }
-////                .onEach { Timber.e(it.toString()) }
 //                .collect()
 //        }
-
-        viewModelScope.launch {
-            roomUseCase.getSensorDataFlow()
-                .onEach { Timber.e(it.toString()) }
-                .collect()
-        }
+//        viewModelScope.launch {
+//            delay(60000) // timeOut
+//            job.cancelAndJoin() // collect() 취소를 위해서 job cancel
+//        }
 
         viewModelScope.launch {
             errorFlow.collect {
@@ -57,7 +57,7 @@ class SensorViewModel @Inject constructor(
             roomUseCase.insertSensorData(
                 SensorData.EMPTY.copy(
                     dataList = accSensorDataList,
-                    type = SensorType.GYRO
+                    type = SensorType.ACC
                 )
             )
 
