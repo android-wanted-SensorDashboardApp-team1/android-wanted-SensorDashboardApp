@@ -41,9 +41,8 @@ class MeasureViewModel @Inject constructor(
         extraBufferCapacity = 1,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
-    private val pressStop: SharedFlow<Unit> = _pressStop.asSharedFlow()
 
-    private var currentSensorType = "Acc"
+    private var currentSensorType: SensorType = SensorType.ACC
 
     val measuredSensorData = _measuredSensorData.asStateFlow()
 
@@ -71,7 +70,7 @@ class MeasureViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
-            pressStop.collect {
+            _pressStop.collect {
                 job.cancelAndJoin()
             }
         }
@@ -91,7 +90,7 @@ class MeasureViewModel @Inject constructor(
         }
     }
 
-    fun updateCurrentSensorType(type: String) {
+    fun updateCurrentSensorType(type: SensorType) {
         currentSensorType = type
     }
 
@@ -104,7 +103,7 @@ class MeasureViewModel @Inject constructor(
                 SensorData.EMPTY.copy(
                     dataList = sensorDataList,
                     type = when (currentSensorType) {
-                        "Acc" -> {
+                        SensorType.ACC -> {
                             SensorType.ACC
                         }
                         else -> {

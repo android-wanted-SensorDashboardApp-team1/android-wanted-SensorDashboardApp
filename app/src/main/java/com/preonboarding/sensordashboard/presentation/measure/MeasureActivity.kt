@@ -10,13 +10,13 @@ import androidx.core.view.get
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import com.preonboarding.sensordashboard.R
 import com.preonboarding.sensordashboard.databinding.ActivityMeasureBinding
+import com.preonboarding.sensordashboard.domain.model.SensorType
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -35,16 +35,16 @@ class MeasureActivity : AppCompatActivity() {
     }
 
     private fun initListener() = with(binding) {
-        var type = "Acc"
+        var type = SensorType.ACC
         radioGroup.check(R.id.radio_button_acc)
         radioGroup.setOnCheckedChangeListener { radioGroup, i ->
             when (i) {
                 R.id.radio_button_acc -> {
-                    type = "Acc"
+                    type = SensorType.ACC
                     refreshData()
                 }
                 R.id.radio_button_gyro -> {
-                    type = "Gyro"
+                    type = SensorType.GYRO
                     refreshData()
                 }
             }
@@ -52,6 +52,9 @@ class MeasureActivity : AppCompatActivity() {
         tvMeasure.setOnClickListener {
             radioGroup[0].isEnabled = false
             radioGroup[1].isEnabled = false
+
+            initChart()
+            viewModel.clearSensorDataList()
             time = object : CountDownTimer(60000, 100) {
                 override fun onTick(tick: Long) {
                     viewModel.measureTime = tick
@@ -65,16 +68,16 @@ class MeasureActivity : AppCompatActivity() {
             }.start()
             tvStop.visibility = 0
             when (type) {
-                "Acc" -> {
-                    viewModel.updateCurrentSensorType("Acc")
-                    viewModel.clearSensorDataList()
+                SensorType.ACC -> {
+                    viewModel.updateCurrentSensorType(SensorType.ACC)
+
                     viewModel.measureAccSensor()
                 }
-                "Gyro" -> {
-                    viewModel.updateCurrentSensorType("Gyro")
-                    viewModel.clearSensorDataList()
+                SensorType.GYRO -> {
+                    viewModel.updateCurrentSensorType(SensorType.GYRO)
                     viewModel.measureGyroSensor()
                 }
+                else -> {}
             }
         }
         tvStop.setOnClickListener {
@@ -101,7 +104,7 @@ class MeasureActivity : AppCompatActivity() {
                     .show()
             }
         }
-        ivBack.setOnClickListener { // 뒤로 가기
+        ivBack.setOnClickListener {
             finish()
         }
     }
@@ -130,7 +133,7 @@ class MeasureActivity : AppCompatActivity() {
         setGridBackgroundColor(Color.WHITE)
         description.text = ""
 
-        setTouchEnabled(false)
+        setTouchEnabled(true)
         setScaleEnabled(false)
 
         isAutoScaleMinMaxEnabled = true
@@ -138,11 +141,8 @@ class MeasureActivity : AppCompatActivity() {
 
         xAxis.setDrawGridLines(true)
         xAxis.setDrawAxisLine(false)
-
         xAxis.isEnabled = true
-        xAxis.setDrawGridLines(false)
 
-        // Y
         axisLeft.isEnabled = true
         axisLeft.setDrawGridLines(true)
         axisRight.isEnabled = false
@@ -196,7 +196,8 @@ class MeasureActivity : AppCompatActivity() {
         data.notifyDataChanged()
 
         notifyDataSetChanged()
-        moveViewTo(data.entryCount.toFloat(), 50f, YAxis.AxisDependency.LEFT)
+        setVisibleXRangeMaximum(10f)
+        moveViewToX(data.entryCount.toFloat())
     }
 
     private fun refreshData() {
