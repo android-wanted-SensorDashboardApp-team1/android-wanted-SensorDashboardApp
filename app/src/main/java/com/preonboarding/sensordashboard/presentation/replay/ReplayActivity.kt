@@ -17,6 +17,8 @@ import com.preonboarding.sensordashboard.databinding.ActivityReplayBinding
 import com.preonboarding.sensordashboard.domain.model.SensorData
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import java.text.DecimalFormat
 
 @AndroidEntryPoint
@@ -32,23 +34,25 @@ class ReplayActivity : AppCompatActivity() {
         observeData()
         initChart()
         initListener()
+        if (intent != null) {
+            val sensor = intent.getStringExtra("sensorData")
+            if (sensor != null) {
+                val sensorData = Json.decodeFromString<SensorData>(sensor)
+                initUI(sensorData = sensorData)
+            }
+        }
     }
 
     private fun initListener() = with(binding) {
         ivPlay.setOnClickListener {
             initChart()
-            viewModel.getDataUnit()
             viewModel.initCurrentReplayTime()
-            lifecycleScope.launch {
-                repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                    viewModel.sensorData.collect {
-                        if (it.dataList.isNotEmpty()) {
-                            initUI(it)
-                        }
-                    }
-                }
-            }
+            viewModel.updateSensorUnitData(viewModel.sensorDataList)
+            ivPlay.visibility = View.GONE
+            ivStop.visibility = View.VISIBLE
+            tvCurrentState.text = getString(R.string.replay_state_play)
         }
+
         ivStop.setOnClickListener {
             viewModel.pressStopButton()
             ivPlay.visibility = View.VISIBLE
@@ -95,10 +99,10 @@ class ReplayActivity : AppCompatActivity() {
 
     private fun initUI(sensorData: SensorData) = with(binding) {
         tvDate.text = sensorData.date
-        tvCurrentState.text = getString(R.string.replay_state_play)
-        ivPlay.visibility = View.GONE
-        ivStop.visibility = View.VISIBLE
-        viewModel.updateSensorUnitData(sensorData.dataList)
+        tvCurrentState.text = getString(R.string.replay_state_view)
+        ivPlay.visibility = View.VISIBLE
+        ivStop.visibility = View.GONE
+        viewModel.updateSensorList(sensorData.dataList)
     }
 
     private fun initChart() = with(binding.lineChart) {
