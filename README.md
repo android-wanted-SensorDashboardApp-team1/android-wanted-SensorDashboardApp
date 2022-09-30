@@ -511,3 +511,10 @@ object CustomTimer {
 
 - 브랜치를 생성하기 전, github issue를 생성해주세요.
 - branch 명의 issue number는 해당 issue Number로 지정합니다. 
+
+### PR Convention
+``` [Issue-#number] PR 내용 ```
+
+- e.g) ``` [Issue-#7] Timer 추가 ``` 
+
+
