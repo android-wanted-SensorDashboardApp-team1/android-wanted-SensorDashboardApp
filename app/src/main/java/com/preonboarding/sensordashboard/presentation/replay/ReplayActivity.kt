@@ -3,7 +3,6 @@ package com.preonboarding.sensordashboard.presentation.replay
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
@@ -15,7 +14,6 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import com.preonboarding.sensordashboard.R
 import com.preonboarding.sensordashboard.databinding.ActivityReplayBinding
-import com.preonboarding.sensordashboard.domain.model.SensorAxisData
 import com.preonboarding.sensordashboard.domain.model.SensorData
 import com.preonboarding.sensordashboard.util.GraphType
 import dagger.hilt.android.AndroidEntryPoint
@@ -29,7 +27,6 @@ class ReplayActivity : AppCompatActivity() {
 
     private val binding by lazy { ActivityReplayBinding.inflate(layoutInflater) }
     private val viewModel: ReplayViewModel by viewModels()
-    private lateinit var type: GraphType
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,26 +37,16 @@ class ReplayActivity : AppCompatActivity() {
         initListener()
         if (intent != null) {
             val sensor = intent.getStringExtra("sensorData")
-            val type = intent.getStringExtra("type")
-            if (sensor != null && type != null) {
+            val type: GraphType = intent.getSerializableExtra("type") as GraphType
+            if (sensor != null) {
                 val sensorData = Json.decodeFromString<SensorData>(sensor)
 
-                if (type == "View") {
-                    initUITypeView(sensorData.dataList)
+                if (type == GraphType.VIEW) {
+                    initUITypeView(sensorData = sensorData)
                 } else {
                     initUITypePlay(sensorData = sensorData)
                 }
             }
-
-            type = (intent.getSerializableExtra("type")) as GraphType
-        }
-
-        if (type == GraphType.PLAY) {
-            //play 용 화면 그리기
-            Toast.makeText(applicationContext,"play", Toast.LENGTH_SHORT).show()
-        } else if (type == GraphType.VIEW) {
-            //view 용 화면 그리기
-            Toast.makeText(applicationContext,"view", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -125,13 +112,14 @@ class ReplayActivity : AppCompatActivity() {
         viewModel.updateSensorList(sensorData.dataList)
     }
 
-    private fun initUITypeView(sensorDataList: List<SensorAxisData>) = with(binding) {
+    private fun initUITypeView(sensorData: SensorData) = with(binding) {
         ivPlay.visibility = View.GONE
         ivStop.visibility = View.GONE
         tvCurrentState.text = getString(R.string.replay_state_view)
+        tvDate.text = sensorData.date
         tvTime.visibility = View.GONE
         lifecycleScope.launch {
-            sensorDataList.forEach {
+            sensorData.dataList.forEach {
                 addEntry(it.x.toDouble(), "x")
                 addEntry(it.y.toDouble(), "y")
                 addEntry(it.z.toDouble(), "z")
