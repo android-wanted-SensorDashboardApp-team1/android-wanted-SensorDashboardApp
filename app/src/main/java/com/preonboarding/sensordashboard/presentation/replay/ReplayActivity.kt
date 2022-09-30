@@ -3,7 +3,6 @@ package com.preonboarding.sensordashboard.presentation.replay
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
@@ -28,7 +27,6 @@ class ReplayActivity : AppCompatActivity() {
 
     private val binding by lazy { ActivityReplayBinding.inflate(layoutInflater) }
     private val viewModel: ReplayViewModel by viewModels()
-    private lateinit var type: GraphType
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,20 +37,16 @@ class ReplayActivity : AppCompatActivity() {
         initListener()
         if (intent != null) {
             val sensor = intent.getStringExtra("sensorData")
+            val type: GraphType = intent.getSerializableExtra("type") as GraphType
             if (sensor != null) {
                 val sensorData = Json.decodeFromString<SensorData>(sensor)
-                initUI(sensorData = sensorData)
+
+                if (type == GraphType.VIEW) {
+                    initUITypeView(sensorData = sensorData)
+                } else {
+                    initUITypePlay(sensorData = sensorData)
+                }
             }
-
-            type = (intent.getSerializableExtra("type")) as GraphType
-        }
-
-        if (type == GraphType.PLAY) {
-            //play 용 화면 그리기
-            Toast.makeText(applicationContext,"play", Toast.LENGTH_SHORT).show()
-        } else if (type == GraphType.VIEW) {
-            //view 용 화면 그리기
-            Toast.makeText(applicationContext,"view", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -110,12 +104,30 @@ class ReplayActivity : AppCompatActivity() {
         }
     }
 
-    private fun initUI(sensorData: SensorData) = with(binding) {
+    private fun initUITypePlay(sensorData: SensorData) = with(binding) {
         tvDate.text = sensorData.date
-        tvCurrentState.text = getString(R.string.replay_state_view)
+        tvCurrentState.text = getString(R.string.replay_state_play)
         ivPlay.visibility = View.VISIBLE
         ivStop.visibility = View.GONE
         viewModel.updateSensorList(sensorData.dataList)
+    }
+
+    private fun initUITypeView(sensorData: SensorData) = with(binding) {
+        ivPlay.visibility = View.GONE
+        ivStop.visibility = View.GONE
+        tvCurrentState.text = getString(R.string.replay_state_view)
+        tvDate.text = sensorData.date
+        tvTime.visibility = View.GONE
+        lifecycleScope.launch {
+            sensorData.dataList.forEach {
+                addEntry(it.x.toDouble(), "x")
+                addEntry(it.y.toDouble(), "y")
+                addEntry(it.z.toDouble(), "z")
+                binding.tvX.text = it.x.toString()
+                binding.tvY.text = it.y.toString()
+                binding.tvZ.text = it.z.toString()
+            }
+        }
     }
 
     private fun initChart() = with(binding.lineChart) {

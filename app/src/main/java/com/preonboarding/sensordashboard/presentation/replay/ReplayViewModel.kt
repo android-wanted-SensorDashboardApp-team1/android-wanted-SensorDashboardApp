@@ -25,7 +25,7 @@ class ReplayViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _sensorUnitData: MutableStateFlow<SensorAxisData> = MutableStateFlow(SensorAxisData(0f, 0f, 0f))
-    private val _sensorBindingData: MutableSharedFlow<SensorAxisData> = MutableSharedFlow<SensorAxisData>(replay = 0, 1, BufferOverflow.DROP_OLDEST)
+    private val _sensorBindingData: MutableSharedFlow<SensorAxisData> = MutableSharedFlow(replay = 0, 1, BufferOverflow.DROP_OLDEST)
     val sensorBindingData = _sensorBindingData.asSharedFlow()
 
     private val _stopPressed: MutableSharedFlow<Unit> = MutableSharedFlow<Unit>(0, 1, BufferOverflow.DROP_OLDEST)
