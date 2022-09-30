@@ -12,6 +12,10 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+/***
+ * @Created by 서강휘 2022.09.27
+ */
+
 @Module
 @InstallIn(SingletonComponent::class)
 object SensorModule {

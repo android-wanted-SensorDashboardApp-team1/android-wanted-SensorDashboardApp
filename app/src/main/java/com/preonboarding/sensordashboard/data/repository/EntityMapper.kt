@@ -7,6 +7,10 @@ import com.preonboarding.sensordashboard.util.DateUtil
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
+/***
+ * @Created by 서강휘 2022.09.28
+ */
+
 fun SensorData.toEntity(json: Json) = SensorDataEntity.EMPTY.copy(
     dataList = sensorAxisToString(json, this.dataList),
     type = this.type,

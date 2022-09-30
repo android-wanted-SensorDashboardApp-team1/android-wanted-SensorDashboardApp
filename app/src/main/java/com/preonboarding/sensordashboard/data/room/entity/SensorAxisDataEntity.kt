@@ -2,6 +2,10 @@ package com.preonboarding.sensordashboard.data.room.entity
 
 import kotlinx.serialization.Serializable
 
+/***
+ * @Created by 서강휘 2022.09.28
+ */
+
 @Serializable
 data class SensorAxisDataEntity(
     val x: Float,
