@@ -8,6 +8,9 @@ import com.preonboarding.sensordashboard.domain.model.SensorData
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
+/***
+ * @Created by 서강휘 2022.09.28
+ */
 
 fun SensorDataEntity.toModel(json: Json) = SensorData(
     id = this.id,

@@ -8,6 +8,10 @@ import com.preonboarding.sensordashboard.data.room.entity.SensorAxisDataEntity
 import com.preonboarding.sensordashboard.data.room.entity.SensorDataEntity
 import kotlinx.coroutines.flow.Flow
 
+/***
+ * @Created by 서강휘 2022.09.28
+ */
+
 @Dao
 interface SensorDao {
 

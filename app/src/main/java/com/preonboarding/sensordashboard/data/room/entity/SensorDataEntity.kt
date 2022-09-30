@@ -6,6 +6,10 @@ import androidx.room.PrimaryKey
 import com.preonboarding.sensordashboard.domain.model.SensorType
 import com.preonboarding.sensordashboard.util.DateUtil
 
+/***
+ * @Created by 서강휘 2022.09.28
+ */
+
 @Entity(tableName = "SensorDataEntity")
 data class SensorDataEntity(
     @PrimaryKey(autoGenerate = true) val id: Long,

@@ -5,6 +5,10 @@ import com.preonboarding.sensordashboard.domain.usecase.ErrorUseCase
 import kotlinx.coroutines.flow.MutableSharedFlow
 import javax.inject.Inject
 
+/***
+ * @Created by 서강휘 2022.09.28
+ */
+
 class ErrorUseCaseImpl @Inject constructor(
     private val sensorRepository: SensorRepository
 ) : ErrorUseCase {

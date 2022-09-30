@@ -22,6 +22,10 @@ import kotlinx.serialization.json.Json
 import timber.log.Timber
 import javax.inject.Inject
 
+/***
+ * @Created by 서강휘 2022.09.27
+ */
+
 class LocalDataSource @Inject constructor(
     private val sensorManager: SensorManager,
     private val sensorDataBase: SensorDataBase,

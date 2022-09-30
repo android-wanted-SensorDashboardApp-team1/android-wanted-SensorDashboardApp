@@ -8,6 +8,9 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.*
 import javax.inject.Singleton
 
+/***
+ * @Created by 서강휘 2022.09.28
+ */
 
 @Module
 @InstallIn(SingletonComponent::class)
