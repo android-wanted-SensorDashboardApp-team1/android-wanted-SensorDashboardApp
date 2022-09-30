@@ -1,11 +1,11 @@
 package com.preonboarding.sensordashboard.data.room
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.preonboarding.sensordashboard.data.room.entity.SensorDataEntity
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SensorDao {
@@ -14,7 +14,7 @@ interface SensorDao {
     fun insertSensorData(sensorDataEntity: SensorDataEntity)
 
     @Query("SELECT * FROM SensorDataEntity ORDER BY dateValue DESC")
-    fun getSensorDataFlow(): Flow<List<SensorDataEntity>>
+    fun getSensorDataPagingSource(): PagingSource<Int, SensorDataEntity>
 
     @Query("DELETE FROM SensorDataEntity WHERE id = :id")
     fun deleteSensorData(id: Long)

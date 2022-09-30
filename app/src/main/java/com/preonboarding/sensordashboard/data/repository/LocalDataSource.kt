@@ -4,15 +4,18 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import androidx.paging.PagingSource
 import androidx.room.withTransaction
 import com.preonboarding.sensordashboard.data.dto.AxisData
 import com.preonboarding.sensordashboard.data.room.SensorDataBase
+import com.preonboarding.sensordashboard.data.room.entity.SensorDataEntity
 import com.preonboarding.sensordashboard.di.coroutine.SensorScopeQualifier
 import com.preonboarding.sensordashboard.di.sensor.AccSensorQualifier
 import com.preonboarding.sensordashboard.di.sensor.GyroSensorQualifier
 import com.preonboarding.sensordashboard.domain.model.SensorAxisData
 import com.preonboarding.sensordashboard.domain.model.SensorData
 import com.preonboarding.sensordashboard.domain.model.SensorType
+import com.preonboarding.sensordashboard.util.DateUtil
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.BufferOverflow
@@ -21,9 +24,9 @@ import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
@@ -146,10 +149,27 @@ class LocalDataSource @Inject constructor(
         }
     }
 
-    fun getSensorDataFlow(): Flow<List<SensorData?>> {
-        return sensorDao.getSensorDataFlow().map { list ->
-            list.map {
-                it.toModel(json)
+    fun getSensorDataPagingSource(): PagingSource<Int, SensorDataEntity> {
+        return sensorDao.getSensorDataPagingSource()
+    }
+
+    suspend fun addTestSensorData() {
+        sensorDataBase.withTransaction {
+            (1..100).forEach {
+                sensorDao.insertSensorData(
+                    SensorDataEntity.EMPTY.copy(
+                        dataList = json.encodeToString(
+                            mutableListOf(
+                                SensorAxisData(
+                                    it.toFloat(),
+                                    it.toFloat(),
+                                    it.toFloat()
+                                )
+                            )
+                        ),
+                        date = DateUtil.getCurrentTime()
+                    )
+                )
             }
         }
     }

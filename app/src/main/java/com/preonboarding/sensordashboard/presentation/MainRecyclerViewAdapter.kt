@@ -2,6 +2,7 @@ package com.preonboarding.sensordashboard.presentation
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -9,7 +10,7 @@ import com.preonboarding.sensordashboard.databinding.ItemMainRecyclerviewBinding
 import com.preonboarding.sensordashboard.domain.model.SensorData
 
 class MainRecyclerViewAdapter(val viewModel: SensorViewModel) :
-    ListAdapter<SensorData, MainRecyclerViewAdapter.ViewHolder>(SensorDiffCallback()) {
+    PagingDataAdapter<SensorData, MainRecyclerViewAdapter.ViewHolder>(SensorDiffCallback()) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding =
             ItemMainRecyclerviewBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -17,8 +18,9 @@ class MainRecyclerViewAdapter(val viewModel: SensorViewModel) :
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = getItem(position)
-        holder.bind(item)
+        getItem(position)?.let {
+            holder.bind(it)
+        }
     }
 
     inner class ViewHolder(private val binding: ItemMainRecyclerviewBinding) :
@@ -39,5 +41,4 @@ class SensorDiffCallback : DiffUtil.ItemCallback<SensorData>() {
     override fun areContentsTheSame(oldItem: SensorData, newItem: SensorData): Boolean {
         return oldItem == newItem
     }
-
 }
