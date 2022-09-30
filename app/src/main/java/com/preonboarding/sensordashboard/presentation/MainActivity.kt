@@ -28,6 +28,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+
         binding.viewModel = sensorViewModel
         binding.lifecycleOwner = this
         binding.recyclerviewMain.apply {
@@ -51,8 +52,8 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                sensorViewModel.sensorsFlow.collectLatest { sensors ->
-                    (binding.recyclerviewMain.adapter as MainRecyclerViewAdapter).submitList(sensors)
+                sensorViewModel.sensorsDataPagingFlow.collectLatest { sensors ->
+                    recyclerViewAdapter.submitData(sensors)
                 }
             }
         }

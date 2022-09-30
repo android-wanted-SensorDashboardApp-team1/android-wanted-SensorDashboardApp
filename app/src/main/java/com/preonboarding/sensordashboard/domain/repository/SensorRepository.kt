@@ -1,5 +1,6 @@
 package com.preonboarding.sensordashboard.domain.repository
 
+import androidx.paging.PagingData
 import com.preonboarding.sensordashboard.domain.model.SensorAxisData
 import com.preonboarding.sensordashboard.domain.model.SensorData
 import kotlinx.coroutines.flow.Flow
@@ -15,7 +16,7 @@ interface SensorRepository {
 
     suspend fun insertSensorData(sensorData: SensorData)
 
-    fun getSensorDataFlow(): Flow<List<SensorData?>>
+    fun getSensorDataPagerFlow(): Flow<PagingData<SensorData>>
 
     suspend fun deleteSensorData(id: Long)
 }
