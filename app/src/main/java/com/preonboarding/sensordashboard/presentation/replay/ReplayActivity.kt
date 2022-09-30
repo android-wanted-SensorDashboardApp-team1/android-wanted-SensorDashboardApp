@@ -55,6 +55,9 @@ class ReplayActivity : AppCompatActivity() {
             ivStop.visibility = View.GONE
             tvCurrentState.text = getString(R.string.replay_state_stop)
         }
+        ivBack.setOnClickListener {
+            finish()
+        }
     }
 
     private fun observeData() = with(lifecycleScope) {

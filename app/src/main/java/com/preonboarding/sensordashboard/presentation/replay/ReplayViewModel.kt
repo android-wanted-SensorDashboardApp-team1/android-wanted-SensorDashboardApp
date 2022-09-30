@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.preonboarding.sensordashboard.domain.model.SensorAxisData
 import com.preonboarding.sensordashboard.domain.model.SensorData
 import com.preonboarding.sensordashboard.domain.usecase.RoomUseCase
+import com.preonboarding.sensordashboard.util.CustomTimer
 import com.preonboarding.sensordashboard.util.CustomTimerState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -24,7 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ReplayViewModel @Inject constructor(
     private val roomUseCase: RoomUseCase,
-//    private val timer: Timer
+    private val timer: CustomTimer
 ) : ViewModel() {
 
     private val _sensorData: MutableStateFlow<SensorData> = MutableStateFlow(SensorData.EMPTY)
@@ -79,22 +80,22 @@ class ReplayViewModel @Inject constructor(
             _stopPressed.tryEmit(Unit)
             updateJob.cancelAndJoin()
             timerJob.cancelAndJoin()
-//            timer.setTimerState(CustomTimerState.Stop, null)
+            timer.setTimerState(CustomTimerState.Stop, null)
         }
     }
     fun updateSensorUnitData(sensorAxisDataList: List<SensorAxisData>) {
         emitUnitData()
         initCurrentReplayTime()
-//        timer.setTimerState(CustomTimerState.Start, sensorAxisDataList.size * 100L)
-//        timerJob = viewModelScope.launch {
-//            timer.formatTime.collect { time ->
-//                if (time != "NULL") {
-//                    _currentReplayTime.value = time.toFloat()
-//                } else {
-//                    pressStopButton()
-//                }
-//            }
-//        }
+        timer.setTimerState(CustomTimerState.Start, sensorAxisDataList.size * 100L)
+        timerJob = viewModelScope.launch {
+            timer.formatTime.collect { time ->
+                if (time != "NULL") {
+                    _currentReplayTime.value = time.toFloat()
+                } else {
+                    pressStopButton()
+                }
+            }
+        }
         updateJob = viewModelScope.launch {
             sensorAxisDataList.forEachIndexed { index, sensorAxisData ->
                 _sensorUnitData.value = sensorAxisData
