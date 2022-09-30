@@ -14,9 +14,9 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import com.preonboarding.sensordashboard.R
 import com.preonboarding.sensordashboard.databinding.ActivityMainBinding
 import com.preonboarding.sensordashboard.domain.model.SensorData
-import com.preonboarding.sensordashboard.presentation.SensorViewModel
 import com.preonboarding.sensordashboard.presentation.measure.MeasureActivity
 import com.preonboarding.sensordashboard.presentation.replay.ReplayActivity
+import com.preonboarding.sensordashboard.util.GraphType
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -51,19 +51,31 @@ class MainActivity : AppCompatActivity() {
 
         recyclerViewAdapter.setOnSwipeClickListener(object :
             MainRecyclerViewAdapter.OnSwipeClickListener {
-            override fun onLeftView(sensorData: SensorData) {
-                sensorViewModel.deleteSensorData(sensorData.id)
-            }
+                override fun onLeftView(sensorData: SensorData) {
+                    sensorViewModel.deleteSensorData(sensorData.id)
+                }
 
                 override fun onRightView(sensorData: SensorData) {
                     // 화면전환 코드 추가 필요
                     val data = Json.encodeToString(sensorData)
                     val intent = Intent(this@MainActivity, ReplayActivity::class.java)
                     intent.putExtra("sensorData", data)
+                    intent.putExtra("type", GraphType.PLAY)
                     startActivity(intent)
                 }
             }
         )
+
+        recyclerViewAdapter.setOnClickListener(object :
+            MainRecyclerViewAdapter.OnItemClickListener {
+            override fun onItemClick(sensorData: SensorData) {
+                val data = Json.encodeToString(sensorData)
+                val intent = Intent(this@MainActivity, ReplayActivity::class.java)
+                intent.putExtra("sensorData", data)
+                intent.putExtra("type", GraphType.VIEW)
+                startActivity(intent)
+            }
+        })
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {

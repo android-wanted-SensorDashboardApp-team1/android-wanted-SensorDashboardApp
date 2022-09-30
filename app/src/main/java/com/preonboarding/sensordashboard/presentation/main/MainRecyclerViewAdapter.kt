@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.preonboarding.sensordashboard.databinding.ItemMainRecyclerviewBinding
 import com.preonboarding.sensordashboard.domain.model.SensorData
-import com.preonboarding.sensordashboard.presentation.SensorViewModel
 
 class MainRecyclerViewAdapter(val viewModel: SensorViewModel) :
 
@@ -15,6 +14,7 @@ class MainRecyclerViewAdapter(val viewModel: SensorViewModel) :
     ItemTouchHelperListener {
 
     private lateinit var onSwipeClickListener: OnSwipeClickListener
+    private lateinit var onItemClickListener: OnItemClickListener
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding =
@@ -24,21 +24,26 @@ class MainRecyclerViewAdapter(val viewModel: SensorViewModel) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         getItem(position)?.let {
-            holder.bind(it)
+            holder.bind(it, onItemClickListener)
         }
     }
 
     inner class ViewHolder(private val binding: ItemMainRecyclerviewBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(sensorData: SensorData) {
+        fun bind(sensorData: SensorData, onItemClickListener: OnItemClickListener) {
             binding.viewModel = viewModel
             binding.sensor = sensorData
             binding.executePendingBindings()
+            binding.onItemClickListener = onItemClickListener
         }
     }
 
     fun setOnSwipeClickListener(listener: OnSwipeClickListener) {
         onSwipeClickListener = listener
+    }
+
+    fun setOnClickListener(listener: OnItemClickListener){
+        onItemClickListener = listener
     }
 
     override fun onLeftView(position: Int, viewHolder: RecyclerView.ViewHolder?) {
@@ -53,6 +58,10 @@ class MainRecyclerViewAdapter(val viewModel: SensorViewModel) :
     interface OnSwipeClickListener {
         fun onLeftView(sensorData: SensorData)
         fun onRightView(sensorData: SensorData)
+    }
+
+    interface OnItemClickListener{
+        fun onItemClick(sensorData: SensorData)
     }
 }
 

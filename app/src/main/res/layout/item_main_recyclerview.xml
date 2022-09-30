@@ -7,17 +7,22 @@
 
         <variable
             name="viewModel"
-            type="com.preonboarding.sensordashboard.presentation.SensorViewModel" />
+            type="com.preonboarding.sensordashboard.presentation.main.SensorViewModel" />
 
         <variable
             name="sensor"
             type="com.preonboarding.sensordashboard.domain.model.SensorData" />
+
+        <variable
+            name="onItemClickListener"
+            type="com.preonboarding.sensordashboard.presentation.main.MainRecyclerViewAdapter.OnItemClickListener" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp">
+        android:layout_marginBottom="20dp"
+        android:onClick="@{_ -> onItemClickListener.onItemClick(sensor)}">
 
         <TextView
             android:id="@+id/textview_itemmain_date"

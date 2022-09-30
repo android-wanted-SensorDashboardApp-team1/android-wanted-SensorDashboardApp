@@ -3,6 +3,7 @@ package com.preonboarding.sensordashboard.presentation.replay
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
@@ -15,6 +16,7 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import com.preonboarding.sensordashboard.R
 import com.preonboarding.sensordashboard.databinding.ActivityReplayBinding
 import com.preonboarding.sensordashboard.domain.model.SensorData
+import com.preonboarding.sensordashboard.util.GraphType
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
@@ -26,6 +28,7 @@ class ReplayActivity : AppCompatActivity() {
 
     private val binding by lazy { ActivityReplayBinding.inflate(layoutInflater) }
     private val viewModel: ReplayViewModel by viewModels()
+    private lateinit var type: GraphType
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +43,16 @@ class ReplayActivity : AppCompatActivity() {
                 val sensorData = Json.decodeFromString<SensorData>(sensor)
                 initUI(sensorData = sensorData)
             }
+
+            type = (intent.getSerializableExtra("type")) as GraphType
+        }
+
+        if (type == GraphType.PLAY) {
+            //play 용 화면 그리기
+            Toast.makeText(applicationContext,"play", Toast.LENGTH_SHORT).show()
+        } else if (type == GraphType.VIEW) {
+            //view 용 화면 그리기
+            Toast.makeText(applicationContext,"view", Toast.LENGTH_SHORT).show()
         }
     }
 
