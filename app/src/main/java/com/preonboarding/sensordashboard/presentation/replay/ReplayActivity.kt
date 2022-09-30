@@ -38,6 +38,7 @@ class ReplayActivity : AppCompatActivity() {
         ivPlay.setOnClickListener {
             initChart()
             viewModel.getDataUnit()
+            viewModel.initCurrentReplayTime()
             lifecycleScope.launch {
                 repeatOnLifecycle(Lifecycle.State.RESUMED) {
                     viewModel.sensorData.collect {
@@ -63,6 +64,9 @@ class ReplayActivity : AppCompatActivity() {
                     addEntry(it.x.toDouble(), "x")
                     addEntry(it.y.toDouble(), "y")
                     addEntry(it.z.toDouble(), "z")
+                    binding.tvX.text = it.x.toString()
+                    binding.tvY.text = it.y.toString()
+                    binding.tvZ.text = it.z.toString()
                 }
             }
         }
