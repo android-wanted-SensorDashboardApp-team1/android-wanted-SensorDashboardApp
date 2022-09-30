@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.preonboarding.sensordashboard.domain.model.SensorAxisData
 import com.preonboarding.sensordashboard.domain.model.SensorData
 import com.preonboarding.sensordashboard.domain.usecase.RoomUseCase
+import com.preonboarding.sensordashboard.util.CustomTimerState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
@@ -22,7 +23,8 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class ReplayViewModel @Inject constructor(
-    private val roomUseCase: RoomUseCase
+    private val roomUseCase: RoomUseCase,
+//    private val timer: Timer
 ) : ViewModel() {
 
     private val _sensorData: MutableStateFlow<SensorData> = MutableStateFlow(SensorData.EMPTY)
@@ -36,6 +38,8 @@ class ReplayViewModel @Inject constructor(
     val stopPressed = _stopPressed.asSharedFlow()
 
     lateinit var updateJob: Job
+
+    lateinit var timerJob: Job
 
     private val _currentReplayTime: MutableStateFlow<Float> = MutableStateFlow(0f)
     val currentReplayTime = _currentReplayTime.asSharedFlow()
@@ -74,25 +78,32 @@ class ReplayViewModel @Inject constructor(
         viewModelScope.launch {
             _stopPressed.tryEmit(Unit)
             updateJob.cancelAndJoin()
+            timerJob.cancelAndJoin()
+//            timer.setTimerState(CustomTimerState.Stop, null)
         }
     }
     fun updateSensorUnitData(sensorAxisDataList: List<SensorAxisData>) {
         emitUnitData()
         initCurrentReplayTime()
-        println(sensorAxisDataList.size)
+//        timer.setTimerState(CustomTimerState.Start, sensorAxisDataList.size * 100L)
+//        timerJob = viewModelScope.launch {
+//            timer.formatTime.collect { time ->
+//                if (time != "NULL") {
+//                    _currentReplayTime.value = time.toFloat()
+//                } else {
+//                    pressStopButton()
+//                }
+//            }
+//        }
         updateJob = viewModelScope.launch {
             sensorAxisDataList.forEachIndexed { index, sensorAxisData ->
                 _sensorUnitData.value = sensorAxisData
                 delay(100)
-                _currentReplayTime.value = (index + 1) / 10f
-                if (index == sensorAxisDataList.size - 1) {
-                    _stopPressed.tryEmit(Unit)
-                }
             }
         }
     }
 
-    private fun initCurrentReplayTime() {
+    fun initCurrentReplayTime() {
         _currentReplayTime.value = 0f
     }
 }
