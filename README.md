@@ -105,7 +105,8 @@
 
 ### DAO
 
-![image](https://user-images.githubusercontent.com/45396949/192828556-e3b925fe-f045-43cf-9b89-3c3e3d1dbb44.png)
+![image](https://user-images.githubusercontent.com/31344894/193222114-dee2ce42-8fbf-4d0a-9631-1424eb141a6a.png)
+
 
 - 측정할 Sensor를 Room DB에 저장할 수 있도록 구현했습니다. 
 - Flow를 통해 Room DB가 업데이트 될 시, 비동기 스트림으로 제공할 수 있도록 구현했습니다. 
@@ -245,136 +246,99 @@ https://user-images.githubusercontent.com/35549958/193092306-73a2e060-4596-42d3-
 - Adapter로 부터 아이템의 id를 받아서 viewmodel에게 전달, 아이템 삭제  
 
 -------------------
+
 ## 박규림
+
 - 담당한 일
-	- paging library 적용
+    - Paging Library를 RecylerView에 적용
 - 기여한 점
-	- paging library 관련 소스 작성
+    - Paging Library 구현
 - 아쉬운 점
-	- paging library 완성하지 못한 것이 아쉽습니다.
-	
-<img width="605" alt="스크린샷 2022-09-30 오전 4 08 15" src="https://user-images.githubusercontent.com/31344894/193120957-97952d81-0148-48fc-8a22-659e9b46758c.png">
+    - PagingSource를 직접 구현하지 않고 Room이 제공하는 PagingSource를 사용한 것이 아쉽습니다.
+    - 추후 이전에 직접 구현한 PagingSource의 작동하지 않았던 원리를 찾아내도록 하겠습니다.
 
-### Repository Layer
-- 구성요소
-	- PagingSource: 데이터 소스와 이 소스에서 데이터를 검색하는 방법 정의
-```kotlin
-class SensorPagingSource (
-    private val repository: SensorRepository
-): PagingSource<Int, SensorData>() {
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SensorData> {
-        val page = params.key ?: 1
-        return try {
-            val entities = repository.getSensorDataFlow()
+### 시연
 
-            if (page != 0) delay(1000)
-            LoadResult.Page(
-                data = entities,
-                prevKey = if (page == 0) null else page - 1,
-                nextKey = if (entities.isEmpty()) null else page + 1
-            )
-        } catch (e: java.lang.Exception) {
-            LoadResult.Error(e)
-        }
-    }
+https://user-images.githubusercontent.com/31344894/193221223-756f8725-4c2e-4d00-a77f-0c22cbc5a51e.mp4
 
-    override fun getRefreshKey(state: PagingState<Int, SensorData>): Int? {
-        return state.anchorPosition?.let { anchorPosition ->
-            val anchorPage = state.closestPageToPosition(anchorPosition)
-            anchorPage?.prevKey?.plus(1) ?: anchorPage?.nextKey?.minus(1)
-        }
-    }
-}
-```
+### 용어 설명
 
-### ViewModel Layer
-- 구성요소
-	- PagingData: 페이지로 나눈 데이터의 스냅샷을 보유하는 컨테이너
+- PagingSource: network, local datasource와 datasource에서 데이터를 검색하는 방법을 정의
+- Pager: PagingData 인스턴스를 구성하는 반응형 스트림(Flow, …)을 생성
+- PagingData: Paging된 데이터의 Container 역할이며 한 번에 작업할 수 있는 양 만큼 snapshot으로 만들어 제공함
+- PagingDataAdapter: PagingData를 RecyclerView에 바인딩하기 위해 사용
 
-```kotlin
-interface SensorRepository {
-    fun getSensorDataFlow(): Flow<PagingData<SensorData>>
-}
-````
+### 상세 구현 설명
 
-```kotlin
-class SensorRepositoryImpl @Inject constructor(
-    private val localDataSource: LocalDataSource
-) : SensorRepository {
-    override fun getSensorDataFlow(): Flow<PagingData<SensorData>> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = 10,
-                enablePlaceholders = false
-            ),
-            pagingSourceFactory = {SensorPagingSource(this)}
-        ).flow
-    }
-```
-- Repository에서 Pager와 PagingSource를 사용하여 PagingData로 반환
+- Room으로부터 PagingSource 제공받기 위해 build.gradle 설정을 해줍니다. 
+    
+    `implementation("androidx.room:room-paging:2.4.3")`
+    
+- DAO에서 PagingSource<Int, SensorDataEntity>를 해줌으로써 PagingSource를 가져옵니다.
+    - PagingSource를 가져와줌으로써 Room DB를 비동기적으로 바라보는 Flow는 필요없어집니다.
+    
+    ```kotlin
+    // 필요없어진 쿼리문 
+    // @Query("SELECT * FROM SensorDataEntity ORDER BY dateValue DESC")
+    //    fun getSensorDataFlow(): Flow<List<SensorDataEntity>>
+    
+    @Query("SELECT * FROM SensorDataEntity ORDER BY dateValue DESC")
+        fun getSensorDataPagingSource(): PagingSource<Int, SensorDataEntity>
+    ```
+    
 
-```kotlin
-fun getSensorData() {
-        viewModelScope.launch {
-            roomUseCase.getSensorDataFlow().cachedIn(viewModelScope).collectLatest {
-                _sensorFlow.emit(it)
+- pagingSourceFactory에 앞서 전달받은 PagingSource를 설정해 Pager에게 넘겨줍니다.
+    - Room으로부터 제공받은 PagingSource를 Pager에게 넘겨주면, Pager는 PagingSource를 가지고 값을 만들고 그것을 Flow에 방출시키는 구조입니다.
+- PagingConfig 매개변수를 넘겨줌으로써 PagingSource에서 콘텐츠를 로드하는 방법에 대한 옵션을 설정해줍니다.
+    
+    ```kotlin
+    // SensorRepositoryImpl.kt
+    override fun getSensorDataPagerFlow(): Flow<PagingData<SensorData>> {
+            return Pager(
+                config = PagingConfig(
+                    pageSize = 10,
+                    enablePlaceholders = false
+                ),
+                initialKey = 1,
+                pagingSourceFactory = { localDataSource.getSensorDataPagingSource() }
+            ).flow.map { pagingData ->
+                pagingData.map {
+                    it.toModel(json)
             }
         }
     }
-```
-- ViewModel에서 PagingData 가져오기 
+    ```
+    
 
-### UI Layer
-- 구성요소
-	- PagingDataAdapter: 페이지로 나눈 데이터를 처리하는 RecyclerView Adapter 
-
-```kotlin
-class MainRecyclerViewAdapter(val viewModel: SensorViewModel) :
-    PagingDataAdapter<SensorData, MainRecyclerViewAdapter.ViewHolder>(SensorDiffCallback()) {
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding =
-            ItemMainRecyclerviewBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ViewHolder(binding)
-    }
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        getItem(position)?.let { 
-            holder.bind(it)
+- UseCase에는 Pager로부터 제공하는 Flow를 넘기는 연산이 필요합니다.
+    - sensorRepository.getSensorDataPagerFlow() 메서드로부터 Flow가 넘어옵니다.
+    
+    ```kotlin
+    // RoomUseCaseImpl.kt
+    override fun getSensorPagingDataFlow(): Flow<PagingData<SensorData>> {
+            return sensorRepository.getSensorDataPagerFlow()
         }
-    }
+    ```
+    
 
-    inner class ViewHolder(private val binding: ItemMainRecyclerviewBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun bind(sensorData: SensorData) {
-            // 생략
-        }
-    }
-}
+- ViewModel에서는 UseCase로부터 데이터를 넘겨받습니다.
+    
+    ```kotlin
+    val sensorsDataPagingFlow = roomUseCase.getSensorPagingDataFlow()
+    ```
+    
 
-class SensorDiffCallback : DiffUtil.ItemCallback<SensorData>() {
-    override fun areItemsTheSame(oldItem: SensorData, newItem: SensorData): Boolean {
-        return oldItem.id == newItem.id
-    }
-
-    override fun areContentsTheSame(oldItem: SensorData, newItem: SensorData): Boolean {
-        return oldItem == newItem
-    }
-}
-```
-- PagingDataAdapter를 통해 PagingData 표시 
-
-
-```kotlin
-lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                sensorViewModel.sensorsFlow.collectLatest {
-                    recyclerViewAdapter.submitData(it)
+- MainActivity(Fragment)에서 collect를 통해 Flow 값을 제공받습니다.
+    
+    ```kotlin
+    lifecycleScope.launch {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    sensorViewModel.sensorsDataPagingFlow.collectLatest { sensors ->
+                        recyclerViewAdapter.submitData(sensors)
+                    }
                 }
             }
-        }
-```
-- MainActivity에서 Adapter를 설정하고 PagingData를 collect 하기
-
+    ```
 
 
 -------------------
