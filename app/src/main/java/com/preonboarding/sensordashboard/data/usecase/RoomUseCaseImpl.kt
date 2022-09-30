@@ -19,10 +19,6 @@ class RoomUseCaseImpl @Inject constructor(
         return sensorRepository.getSensorDataPagerFlow()
     }
 
-    override suspend fun addSensorTestData() {
-        return sensorRepository.addSensorTestData()
-    }
-
     override suspend fun deleteSensorData(id: Long) {
         sensorRepository.deleteSensorData(id)
     }

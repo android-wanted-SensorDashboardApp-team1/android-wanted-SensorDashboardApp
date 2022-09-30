@@ -11,6 +11,4 @@ interface RoomUseCase {
     fun getSensorPagingDataFlow() : Flow<PagingData<SensorData>>
 
     suspend fun deleteSensorData(id: Long)
-
-    suspend fun addSensorTestData()
 }

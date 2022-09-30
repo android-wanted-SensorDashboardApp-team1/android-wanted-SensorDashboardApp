@@ -16,8 +16,6 @@ interface SensorRepository {
 
     suspend fun insertSensorData(sensorData: SensorData)
 
-    suspend fun addSensorTestData()
-
     fun getSensorDataPagerFlow(): Flow<PagingData<SensorData>>
 
     suspend fun deleteSensorData(id: Long)

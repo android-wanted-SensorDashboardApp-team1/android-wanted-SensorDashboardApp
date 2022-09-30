@@ -34,10 +34,6 @@ class SensorRepositoryImpl @Inject constructor(
         localDataSource.insertSensorData(sensorData)
     }
 
-    override suspend fun addSensorTestData() {
-        localDataSource.addTestSensorData()
-    }
-
     override fun getSensorDataPagerFlow(): Flow<PagingData<SensorData>> {
         return Pager(
             config = PagingConfig(

@@ -36,7 +36,6 @@ class MainActivity : AppCompatActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 sensorViewModel.sensorsDataPagingFlow.collectLatest { sensors ->
                     recyclerViewAdapter.submitData(sensors)
-//                    (binding.recyclerviewMain.adapter as MainRecyclerViewAdapter).submitList(sensors)
                 }
             }
         }

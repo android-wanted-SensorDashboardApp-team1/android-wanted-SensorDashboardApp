@@ -153,27 +153,6 @@ class LocalDataSource @Inject constructor(
         return sensorDao.getSensorDataPagingSource()
     }
 
-    suspend fun addTestSensorData() {
-        sensorDataBase.withTransaction {
-            (1..100).forEach {
-                sensorDao.insertSensorData(
-                    SensorDataEntity.EMPTY.copy(
-                        dataList = json.encodeToString(
-                            mutableListOf(
-                                SensorAxisData(
-                                    it.toFloat(),
-                                    it.toFloat(),
-                                    it.toFloat()
-                                )
-                            )
-                        ),
-                        date = DateUtil.getCurrentTime()
-                    )
-                )
-            }
-        }
-    }
-
     fun getErrorFlow(): MutableSharedFlow<Throwable> {
         return errorFlow
     }
