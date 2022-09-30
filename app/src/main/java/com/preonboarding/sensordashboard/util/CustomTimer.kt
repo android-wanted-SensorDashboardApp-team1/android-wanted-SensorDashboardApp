@@ -2,15 +2,27 @@ package com.preonboarding.sensordashboard.util
 
 import android.annotation.SuppressLint
 import android.util.Log
+import com.preonboarding.sensordashboard.di.IoDispatcher
 import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.inject.Inject
 
 object CustomTimer {
 
-    private var timerJob : Job = Job()
-    private val coroutineScope = CoroutineScope(Dispatchers.IO)
+    /** TODO        Custom Timer 사용법
+     *  TODO        타이머 Start -> 1. 60초 타이머  :  CustomTimer.setTimerState(TimerState.Start)
+     *  TODO                    -> 2. 커스텀 타이머 ( ex 30초 ): CustomTimer.setTimerState(TimerState.Start, "00:30:00")
+     *  TODO        타이머 Stop  ->  CustomTimer.setTimerState(TimerState.Stop)
+     */
 
+    private var timerJob : Job = Job()
+
+    @IoDispatcher
+    @Inject
+    lateinit var ioDispatcher : CoroutineDispatcher
+
+    private val coroutineScope = CoroutineScope(ioDispatcher)
     private var isActive = false
     private const val MAX_TIME = 60000L
     private var timerCount = 0L
@@ -32,17 +44,19 @@ object CustomTimer {
             is CustomTimerState.Stop -> stopTimerJob()
         }
     }
+
     private fun startTimerJob(){
         if (timerJob.isActive) timerJob.cancel()
         Log.i("CustomTimer","타이머 시작  "+ timerJob.key)
+        val form = SimpleDateFormat(" HH:mm:ss")
 
         timerJob = coroutineScope.launch {
-            withContext(Dispatchers.IO) {
+            withContext(ioDispatcher) {
                 this@CustomTimer.isActive = true
-                while (timerCount >= 0) {
+                while ( timerCount >= 0 && timerJob.isActive ) {
                     delay(1000L)
                     timerCount -= 1000L
-                    formatTime = SimpleDateFormat(" HH:mm:ss").format(Date(timerCount))
+                    formatTime = form.format(Date(timerCount))
                     Log.i("CustomTimer 경과시간 ", formatTime + "@@@@@@@@@" + timerJob.key)
                 }
                 this@CustomTimer.isActive = false
