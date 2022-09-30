@@ -21,7 +21,6 @@ object CustomTimer {
     @IoDispatcher
     @Inject
     lateinit var ioDispatcher : CoroutineDispatcher
-
     private val coroutineScope = CoroutineScope(ioDispatcher)
     private var isActive = false
     private const val MAX_TIME = 60000L
@@ -47,7 +46,6 @@ object CustomTimer {
 
     private fun startTimerJob(){
         if (timerJob.isActive) timerJob.cancel()
-        Log.i("CustomTimer","타이머 시작  "+ timerJob.key)
         val form = SimpleDateFormat(" HH:mm:ss")
 
         timerJob = coroutineScope.launch {
@@ -57,19 +55,15 @@ object CustomTimer {
                     delay(1000L)
                     timerCount -= 1000L
                     formatTime = form.format(Date(timerCount))
-                    Log.i("CustomTimer 경과시간 ", formatTime + "@@@@@@@@@" + timerJob.key)
                 }
                 this@CustomTimer.isActive = false
             }
         }
-
-
     }
 
     @SuppressLint("SimpleDateFormat")
     private fun stopTimerJob():String{
         isActive = false
-        Log.i("CustomTimer ","타이머 정지  " + timerJob.key)
         if (timerJob.isActive) timerJob.cancel()
         return SimpleDateFormat(" HH:mm:ss").format(Date(timerCount))
     }
