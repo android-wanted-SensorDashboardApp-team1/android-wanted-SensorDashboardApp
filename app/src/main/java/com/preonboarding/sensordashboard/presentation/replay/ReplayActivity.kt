@@ -15,6 +15,7 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import com.preonboarding.sensordashboard.R
 import com.preonboarding.sensordashboard.databinding.ActivityReplayBinding
+import com.preonboarding.sensordashboard.domain.model.SensorAxisData
 import com.preonboarding.sensordashboard.domain.model.SensorData
 import com.preonboarding.sensordashboard.util.GraphType
 import dagger.hilt.android.AndroidEntryPoint
@@ -39,9 +40,15 @@ class ReplayActivity : AppCompatActivity() {
         initListener()
         if (intent != null) {
             val sensor = intent.getStringExtra("sensorData")
-            if (sensor != null) {
+            val type = intent.getStringExtra("type")
+            if (sensor != null && type != null) {
                 val sensorData = Json.decodeFromString<SensorData>(sensor)
-                initUI(sensorData = sensorData)
+
+                if (type == "View") {
+                    initUITypeView(sensorData.dataList)
+                } else {
+                    initUITypePlay(sensorData = sensorData)
+                }
             }
 
             type = (intent.getSerializableExtra("type")) as GraphType
@@ -110,12 +117,29 @@ class ReplayActivity : AppCompatActivity() {
         }
     }
 
-    private fun initUI(sensorData: SensorData) = with(binding) {
+    private fun initUITypePlay(sensorData: SensorData) = with(binding) {
         tvDate.text = sensorData.date
-        tvCurrentState.text = getString(R.string.replay_state_view)
+        tvCurrentState.text = getString(R.string.replay_state_play)
         ivPlay.visibility = View.VISIBLE
         ivStop.visibility = View.GONE
         viewModel.updateSensorList(sensorData.dataList)
+    }
+
+    private fun initUITypeView(sensorDataList: List<SensorAxisData>) = with(binding) {
+        ivPlay.visibility = View.GONE
+        ivStop.visibility = View.GONE
+        tvCurrentState.text = getString(R.string.replay_state_view)
+        tvTime.visibility = View.GONE
+        lifecycleScope.launch {
+            sensorDataList.forEach {
+                addEntry(it.x.toDouble(), "x")
+                addEntry(it.y.toDouble(), "y")
+                addEntry(it.z.toDouble(), "z")
+                binding.tvX.text = it.x.toString()
+                binding.tvY.text = it.y.toString()
+                binding.tvZ.text = it.z.toString()
+            }
+        }
     }
 
     private fun initChart() = with(binding.lineChart) {
