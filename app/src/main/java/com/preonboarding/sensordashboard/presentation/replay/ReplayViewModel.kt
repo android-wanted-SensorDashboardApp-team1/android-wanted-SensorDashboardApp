@@ -3,8 +3,6 @@ package com.preonboarding.sensordashboard.presentation.replay
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.preonboarding.sensordashboard.domain.model.SensorAxisData
-import com.preonboarding.sensordashboard.domain.model.SensorData
-import com.preonboarding.sensordashboard.domain.usecase.RoomUseCase
 import com.preonboarding.sensordashboard.util.CustomTimer
 import com.preonboarding.sensordashboard.util.CustomTimerState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,7 +13,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,12 +21,8 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class ReplayViewModel @Inject constructor(
-    private val roomUseCase: RoomUseCase,
     private val timer: CustomTimer
 ) : ViewModel() {
-
-    private val _sensorData: MutableStateFlow<SensorData> = MutableStateFlow(SensorData.EMPTY)
-    val sensorData = _sensorData.asStateFlow()
 
     private val _sensorUnitData: MutableStateFlow<SensorAxisData> = MutableStateFlow(SensorAxisData(0f, 0f, 0f))
     private val _sensorBindingData: MutableSharedFlow<SensorAxisData> = MutableSharedFlow<SensorAxisData>(replay = 0, 1, BufferOverflow.DROP_OLDEST)
@@ -45,22 +38,7 @@ class ReplayViewModel @Inject constructor(
     private val _currentReplayTime: MutableStateFlow<Float> = MutableStateFlow(0f)
     val currentReplayTime = _currentReplayTime.asSharedFlow()
 
-    init {
-        getDataUnit()
-    }
-    fun getDataUnit() {
-        viewModelScope.launch {
-            roomUseCase.getSensorDataFlow().collect { list ->
-                if (list.isNotEmpty() && list.last() != null) {
-                    _sensorData.value = sensorData.value.copy(
-                        dataList = list.last()!!.dataList,
-                        date = list.last()!!.date,
-                        time = list.last()!!.time
-                    )
-                }
-            }
-        }
-    }
+    var sensorDataList = emptyList<SensorAxisData>()
 
     private fun emitUnitData() {
         val job = viewModelScope.launch {
@@ -106,5 +84,9 @@ class ReplayViewModel @Inject constructor(
 
     fun initCurrentReplayTime() {
         _currentReplayTime.value = 0f
+    }
+
+    fun updateSensorList(sensorDataList: List<SensorAxisData>) {
+        this.sensorDataList = sensorDataList
     }
 }
