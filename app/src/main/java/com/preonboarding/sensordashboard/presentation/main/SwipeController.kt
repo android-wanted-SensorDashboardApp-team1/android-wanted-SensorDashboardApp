@@ -39,10 +39,10 @@ class SwipeController(
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         when (direction) {
             ItemTouchHelper.LEFT -> {
-                itemTouchHelperListener.onRightView(viewHolder.adapterPosition, viewHolder)
+                itemTouchHelperListener.onRightView(viewHolder.bindingAdapterPosition, viewHolder)
             }
             ItemTouchHelper.RIGHT -> {
-                itemTouchHelperListener.onLeftView(viewHolder.adapterPosition, viewHolder)
+                itemTouchHelperListener.onLeftView(viewHolder.bindingAdapterPosition, viewHolder)
             }
         }
     }
