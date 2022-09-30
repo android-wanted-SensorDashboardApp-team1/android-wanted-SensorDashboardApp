@@ -37,25 +37,18 @@ class MainRecyclerViewAdapter(val viewModel: SensorViewModel) :
         onSwipeClickListener = listener
     }
 
-    override fun onItemMove(from_position: Int, to_position: Int): Boolean {
-        return false
+    override fun onLeftView(position: Int, viewHolder: RecyclerView.ViewHolder?) {
+        onSwipeClickListener.onLeftView(getItem(position))
     }
 
-    override fun onItemSwipe(position: Int) {
-
-    }
-
-    override fun onLeftClick(position: Int, viewHolder: RecyclerView.ViewHolder?) {
-        onSwipeClickListener.onLeftClick(getItem(position))
-    }
-
-    override fun onRightClick(position: Int, viewHolder: RecyclerView.ViewHolder?) {
-        onSwipeClickListener.onRightClick(getItem(position))
+    override fun onRightView(position: Int, viewHolder: RecyclerView.ViewHolder?) {
+        onSwipeClickListener.onRightView(getItem(position))
+        notifyItemChanged(position)
     }
 
     interface OnSwipeClickListener {
-        fun onLeftClick(sensorData: SensorData)
-        fun onRightClick(sensorData: SensorData)
+        fun onLeftView(sensorData: SensorData)
+        fun onRightView(sensorData: SensorData)
     }
 }
 

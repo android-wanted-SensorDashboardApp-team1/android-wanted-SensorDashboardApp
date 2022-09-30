@@ -10,7 +10,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.RecyclerView
 import com.preonboarding.sensordashboard.R
 import com.preonboarding.sensordashboard.databinding.ActivityMainBinding
 import com.preonboarding.sensordashboard.domain.model.SensorData
@@ -36,17 +35,17 @@ class MainActivity : AppCompatActivity() {
             adapter = recyclerViewAdapter
         }
 
-        val swipeController = SwipeController(recyclerViewAdapter)
+        val swipeController = SwipeController(applicationContext, recyclerViewAdapter)
         ItemTouchHelper(swipeController).attachToRecyclerView(binding.recyclerviewMain)
 
         recyclerViewAdapter.setOnSwipeClickListener(object :
             MainRecyclerViewAdapter.OnSwipeClickListener {
-            override fun onRightClick(sensorData: SensorData) {
-                //다시보기 페이지로 이동시켜야함. id 넘겨줘야할듯. 물어보자
+            override fun onLeftView(sensorData: SensorData) {
+                sensorViewModel.deleteSensorData(sensorData.id)
             }
 
-            override fun onLeftClick(sensorData: SensorData) {
-                sensorViewModel.deleteSensorData(sensorData.id)
+            override fun onRightView(sensorData: SensorData) {
+                //화면전환 코드 추가 필요
             }
         })
 
