@@ -227,23 +227,32 @@ time = object : CountDownTimer(60000, 100) {
 - 기여한 점
     - 첫번째 목록 페이지 화면 구성
     - ItemTouchHelper를 이용해 swipe시 다시보기, 삭제 구현
-- 남은 작업
-    - swipe 동작이 매끄럽지 않고 불편하여 개선하기
-    - paging3 적용이 완료되면 합치기
-    - 두번째, 세번째 페이지가 완성되면 화면 전환 추가하기
+- 아쉬운 점
+    - 아키텍처도 많이 손대보기
 
 
 ### 시연
-https://user-images.githubusercontent.com/35549958/193092306-73a2e060-4596-42d3-b3e1-498ace8d26b5.mp4
+https://user-images.githubusercontent.com/35549958/193300603-317d8c7b-6906-480d-9313-362711a8f34b.mp4
+
 
 ### RecyclerViewAdapter
 ![image](https://user-images.githubusercontent.com/35549958/193094023-a6c0f7e0-0cf6-4cbf-a15e-3ee284ca4fd6.png)
 - Adapter는 ItemTouchHelper를 상속받는 SwipeController 클래스와 ItemTouchHelperListener 인터페이스를 이용해 소통
 - Adapter 내부에 Interface를 추가하여 Activity에서 원하는 코드를 구현
 
+### SwipController
+![image](https://user-images.githubusercontent.com/35549958/193301647-ffdcefdd-c199-4380-9762-cec2883296b3.png)
+- 왼쪽 오른쪽 스와이프 분기를 나눠서 리스너 동작
+
+
+![image](https://user-images.githubusercontent.com/35549958/193302189-387b996e-f812-4fb0-9213-fb909fde5985.png)
+- 스와이프된 크기와 아이템뷰 크기의 차이를 적절히 계산하여 뷰를 그려줌
+
+
 ### MainActivity
 ![image](https://user-images.githubusercontent.com/35549958/193094504-10e2ead3-986e-4d6f-a822-ff352432a3e2.png)
 - Adapter로 부터 아이템의 id를 받아서 viewmodel에게 전달, 아이템 삭제  
+
 
 -------------------
 
