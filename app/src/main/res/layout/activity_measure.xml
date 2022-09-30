@@ -99,6 +99,8 @@
             android:textAlignment="center"
             android:textColor="@color/red"
             android:gravity="center"
+            android:maxLines="1"
+            android:ellipsize="end"
             app:layout_constraintEnd_toStartOf="@id/tv_y"
 
             />
@@ -112,6 +114,8 @@
             app:layout_constraintEnd_toStartOf="@id/tv_z"
             android:textAlignment="center"
             android:gravity="center"
+            android:maxLines="1"
+            android:ellipsize="end"
             android:textColor="@color/green"
             />
         <TextView
@@ -124,6 +128,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:textAlignment="center"
             android:gravity="center"
+            android:maxLines="1"
+            android:ellipsize="end"
             android:textColor="@color/blue"
             />
     </androidx.constraintlayout.widget.ConstraintLayout>
