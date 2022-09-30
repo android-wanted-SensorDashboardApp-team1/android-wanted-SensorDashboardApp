@@ -19,7 +19,6 @@ import com.preonboarding.sensordashboard.databinding.ActivityMeasureBinding
 import com.preonboarding.sensordashboard.domain.model.SensorType
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 @AndroidEntryPoint
 class MeasureActivity : AppCompatActivity() {
@@ -58,7 +57,6 @@ class MeasureActivity : AppCompatActivity() {
             viewModel.clearSensorDataList()
             time = object : CountDownTimer(60000, 100) {
                 override fun onTick(tick: Long) {
-                    viewModel.measureTime = tick
                 }
 
                 override fun onFinish() {

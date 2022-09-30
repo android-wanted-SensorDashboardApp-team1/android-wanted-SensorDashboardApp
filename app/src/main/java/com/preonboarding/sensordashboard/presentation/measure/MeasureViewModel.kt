@@ -14,7 +14,6 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.text.DecimalFormat
 import javax.inject.Inject
 
 /**
@@ -47,8 +46,6 @@ class MeasureViewModel @Inject constructor(
     val measuredSensorData = _measuredSensorData.asStateFlow()
 
     val sensorDataList = mutableListOf<SensorAxisData>()
-
-    var measureTime: Long = 0
 
     fun measureGyroSensor() {
         val job = viewModelScope.launch {
@@ -96,9 +93,7 @@ class MeasureViewModel @Inject constructor(
 
     fun saveSensorData() {
         viewModelScope.launch {
-            var time = (60000 - measureTime) / 1000f
-            val df = DecimalFormat("#.#")
-            time = df.format(time).toFloat()
+            val time = sensorDataList.size / 10f
             roomUseCase.insertSensorData(
                 SensorData.EMPTY.copy(
                     dataList = sensorDataList,

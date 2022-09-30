@@ -16,15 +16,17 @@ import com.preonboarding.sensordashboard.databinding.ActivityMainBinding
 import com.preonboarding.sensordashboard.domain.model.SensorData
 import com.preonboarding.sensordashboard.presentation.SensorViewModel
 import com.preonboarding.sensordashboard.presentation.measure.MeasureActivity
+import com.preonboarding.sensordashboard.presentation.replay.ReplayActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private val sensorViewModel: SensorViewModel by viewModels()
-
     private lateinit var binding: ActivityMainBinding
     private lateinit var recyclerViewAdapter: MainRecyclerViewAdapter
 
@@ -53,10 +55,15 @@ class MainActivity : AppCompatActivity() {
                 sensorViewModel.deleteSensorData(sensorData.id)
             }
 
-            override fun onRightView(sensorData: SensorData) {
-                //화면전환 코드 추가 필요
+                override fun onRightView(sensorData: SensorData) {
+                    // 화면전환 코드 추가 필요
+                    val data = Json.encodeToString(sensorData)
+                    val intent = Intent(this@MainActivity, ReplayActivity::class.java)
+                    intent.putExtra("sensorData", data)
+                    startActivity(intent)
+                }
             }
-        })
+        )
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {

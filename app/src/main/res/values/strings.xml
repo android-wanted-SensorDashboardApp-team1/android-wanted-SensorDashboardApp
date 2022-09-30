@@ -13,4 +13,14 @@
     <string name="measure_x_init">x 0.0</string>
     <string name="measure_y_init">y 0.0</string>
     <string name="measure_z_init">z 0.0</string>
+
+    <!-- replay activity -->
+    <string name="replay_top_title">다시 보기</string>
+    <string name="replay_item_date_hint">2022/09/07 15:10:11</string>
+    <string name="replay_item_current_state_hint">Play</string>
+    <string name="replay_state_play">Play</string>
+    <string name="replay_state_view">View</string>
+    <string name="replay_state_stop">Stop</string>
+    <string name="replay_measure_time">10.5</string>
+
 </resources>
