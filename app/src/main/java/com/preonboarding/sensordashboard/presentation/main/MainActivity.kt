@@ -1,5 +1,6 @@
-package com.preonboarding.sensordashboard.presentation
+package com.preonboarding.sensordashboard.presentation.main
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -13,6 +14,8 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import com.preonboarding.sensordashboard.R
 import com.preonboarding.sensordashboard.databinding.ActivityMainBinding
 import com.preonboarding.sensordashboard.domain.model.SensorData
+import com.preonboarding.sensordashboard.presentation.SensorViewModel
+import com.preonboarding.sensordashboard.presentation.measure.MeasureActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -29,8 +32,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
+        setSupportActionBar(binding.toolbarMain)
+        supportActionBar?.setDisplayShowHomeEnabled(false)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
+
         binding.viewModel = sensorViewModel
         binding.lifecycleOwner = this
+
         binding.recyclerviewMain.apply {
             recyclerViewAdapter = MainRecyclerViewAdapter(sensorViewModel)
             adapter = recyclerViewAdapter
@@ -67,7 +75,7 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item?.itemId) {
             R.id.item_main_measure -> {
-                //화면전환 코드 추가 필요
+                startActivity(Intent(applicationContext, MeasureActivity::class.java))
                 super.onOptionsItemSelected(item)
             }
             else -> super.onOptionsItemSelected(item)

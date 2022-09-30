@@ -6,6 +6,10 @@ import com.preonboarding.sensordashboard.domain.model.SensorData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 
+/***
+ * @Created by 서강휘 2022.09.27
+ */
+
 interface SensorRepository {
 
     fun getAccFlow(): Flow<SensorAxisData>

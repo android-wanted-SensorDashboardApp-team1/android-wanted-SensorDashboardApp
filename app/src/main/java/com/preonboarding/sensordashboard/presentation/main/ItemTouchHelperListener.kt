@@ -1,4 +1,4 @@
-package com.preonboarding.sensordashboard.presentation
+package com.preonboarding.sensordashboard.presentation.main
 
 import androidx.recyclerview.widget.RecyclerView
 

@@ -1,4 +1,4 @@
-package com.preonboarding.sensordashboard.presentation
+package com.preonboarding.sensordashboard.presentation.main
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.preonboarding.sensordashboard.databinding.ItemMainRecyclerviewBinding
 import com.preonboarding.sensordashboard.domain.model.SensorData
+import com.preonboarding.sensordashboard.presentation.SensorViewModel
 
 class MainRecyclerViewAdapter(val viewModel: SensorViewModel) :
 

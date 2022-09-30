@@ -7,6 +7,10 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.preonboarding.sensordashboard.data.room.entity.SensorDataEntity
 
+/***
+ * @Created by 서강휘 2022.09.28
+ */
+
 @Dao
 interface SensorDao {
 

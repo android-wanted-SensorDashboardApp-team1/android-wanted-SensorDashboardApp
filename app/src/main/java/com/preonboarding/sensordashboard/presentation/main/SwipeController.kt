@@ -1,7 +1,10 @@
-package com.preonboarding.sensordashboard.presentation
+package com.preonboarding.sensordashboard.presentation.main
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
 import android.graphics.drawable.ColorDrawable
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -42,7 +45,6 @@ class SwipeController(
                 itemTouchHelperListener.onLeftView(viewHolder.adapterPosition, viewHolder)
             }
         }
-
     }
 
     override fun onChildDraw(

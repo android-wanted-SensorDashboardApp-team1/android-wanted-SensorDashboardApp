@@ -7,6 +7,10 @@ import com.preonboarding.sensordashboard.domain.usecase.RoomUseCase
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
+/***
+ * @Created by 서강휘 2022.09.28
+ */
+
 class RoomUseCaseImpl @Inject constructor(
     private val sensorRepository: SensorRepository
 ) : RoomUseCase {

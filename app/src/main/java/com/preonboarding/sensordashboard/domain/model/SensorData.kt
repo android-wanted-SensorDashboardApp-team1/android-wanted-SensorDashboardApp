@@ -2,6 +2,10 @@ package com.preonboarding.sensordashboard.domain.model
 
 import com.preonboarding.sensordashboard.util.DateUtil
 
+/***
+ * @Created by 서강휘 2022.09.27
+ */
+
 data class SensorData(
     val id: Long,
     val dataList: List<SensorAxisData>,

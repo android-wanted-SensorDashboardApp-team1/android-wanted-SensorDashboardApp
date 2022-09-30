@@ -6,6 +6,10 @@ import com.preonboarding.sensordashboard.domain.usecase.AccSensorUseCase
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
+/***
+ * @Created by 서강휘 2022.09.27
+ */
+
 class AccSensorUseCaseImpl @Inject constructor(
     private val repository: SensorRepository
 ) : AccSensorUseCase {
