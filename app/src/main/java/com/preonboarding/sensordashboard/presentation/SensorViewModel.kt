@@ -33,7 +33,12 @@ class SensorViewModel @Inject constructor(
 
     private val accSensorDataList = mutableListOf<SensorAxisData>()
 
+    val sensorDataPagingFlow = roomUseCase.getSensorPagingDataFlow()
+
     init {
+        viewModelScope.launch {
+            roomUseCase.addSensorDataTestData()
+        }
 
         viewModelScope.launch {
             errorFlow.collect {
